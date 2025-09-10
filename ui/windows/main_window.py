@@ -140,4 +140,4 @@ class MainWindow(QMainWindow):
         # 0.1 Add objects to a layout
         central_layout.addWidget(self.menu_frame)
         central_layout.addWidget(chat_and_history_frame, 1)
-        central_layout.addWidget(self.send_field_frame)
+        # central_layout.addWidget(self.send_field_frame)
