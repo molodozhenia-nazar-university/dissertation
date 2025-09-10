@@ -72,8 +72,9 @@ class MainWindow(QMainWindow):
         chat_and_history_layout.setSpacing(0)
         chat_and_history_layout.setContentsMargins(0, 0, 0, 0)
 
-        # 2.1 Splitter
+        # 2.1.1 Splitter
         splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.setHandleWidth(5)
 
         # 2.2.1 CHAT WIDGET
         self.chat_frame = QFrame()
@@ -110,12 +111,12 @@ class MainWindow(QMainWindow):
         history_layout.addWidget(self.history_title)
         history_layout.addWidget(self.history_list)
 
-        # 2.4 Add objects to a layout
+        # 2.1.2 Add objects to a layout
         splitter.addWidget(self.chat_frame)
         splitter.addWidget(self.history_frame)
         splitter.setSizes([600, 400])
 
-        # 2.5 Add objects to a layout
+        # 2.4 Add objects to a layout
         chat_and_history_layout.addWidget(splitter)
 
         # 3. SEND_FIELD WIDGET

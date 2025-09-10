@@ -8,7 +8,6 @@ MAIN_WINDOW_STYLES = """
     }
 
     QSplitter::handle {
-        width: 5px;
         background-color: #bdc3c7;
     }
 
