@@ -6,6 +6,7 @@ dist/
 # files
 main.spec
 python_commands.md
+buffer.md
 
 # Python cache
 __pycache__/
