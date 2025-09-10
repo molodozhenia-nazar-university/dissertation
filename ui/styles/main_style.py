@@ -8,20 +8,12 @@ MAIN_WINDOW_STYLES = """
     }
 
     QSplitter::handle {
+        width: 5px;
         background-color: #bdc3c7;
-        width: 3px;
     }
 
     QSplitter::handle:hover {
         background-color: #95a5a6;
-    }
-
-    QLabel.section-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #2c3e50;
-        padding: 10px 0;
-        background-color: transparent;
     }
 
 """
@@ -54,28 +46,6 @@ MENU_STYLES = """
 
 """
 
-SEARCH_HISTORY_STYLES = """
-
-    QFrame#search_history_frame {
-        background-color: #ecf0f1;
-        border-top: 1px solid #bdc3c7;
-        border-bottom: 1px solid #bdc3c7;
-    }
-
-    QLineEdit#search_history_input {
-        padding: 10px 15px;
-        background-color: #ffffff;
-        border: 3px solid #bdc3c7;
-        border-radius: 15px;
-        color: #2c3e50;
-    }
-
-    QLineEdit#search_history_input:focus {
-        border: 3px solid #3498db;
-    }
-
-"""
-
 CHAT_STYLES = """
 
     QFrame#chat_frame {
@@ -101,6 +71,22 @@ HISTORY_STYLES = """
     QFrame#history_frame {
         background-color: #f8f9fa;
         border-left: 1px solid #bdc3c7;
+    }
+
+    QLabel#history_title {
+        font-weight: bold;
+    }
+
+    QLineEdit#history_search {
+        padding: 10px 15px;
+        background-color: #ffffff;
+        border: 3px solid #bdc3c7;
+        border-radius: 15px;
+        color: #2c3e50;
+    }
+
+    QLineEdit#history_search:focus {
+        border: 3px solid #3498db;
     }
 
     QListWidget#history_list {
@@ -156,7 +142,6 @@ def apply_styles(app):
     all_styles = (
         MAIN_WINDOW_STYLES
         + MENU_STYLES
-        + SEARCH_HISTORY_STYLES
         + CHAT_STYLES
         + HISTORY_STYLES
         + SEND_FIELD_STYLES
