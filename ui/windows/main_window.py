@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QTextEdit,
     QPushButton,
+    QStackedWidget,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QStyle
@@ -53,48 +54,94 @@ class MainWindow(QMainWindow):
         self.button_traffic_analysis.setProperty("class", "navigation-button")
         self.button_settings.setProperty("class", "navigation-button")
 
-        # 1.3 Add status for button
-        # NEED TO PROGRAM
-        self.button_system.setCheckable(True)  # status checkable
-        self.button_system.setChecked(True)  # status checked
-        self.button_traffic_analysis.setCheckable(True)  # status checkable
-        self.button_settings.setCheckable(True)  # status checkable
-
-        # 1.4 Add objects to a layout
+        # 1.3 Add objects to a layout
         menu_layout.addWidget(self.button_system)
         menu_layout.addWidget(self.button_traffic_analysis)
         menu_layout.addWidget(self.button_settings)
         menu_layout.addStretch()
 
-        # 2. CHAT and HISTORY WIDGETS
+        # 2 STACKED WIDGET
+
+        self.stacked_widget = QStackedWidget()
+
+        # 0.1 Add objects to a layout
+        central_layout.addWidget(self.menu_frame)
+        central_layout.addWidget(self.stacked_widget)
+
+        # Methods
+        self.create_system_tab()
+        self.create_traffic_analysis_tab()
+        self.create_settings_tab()
+        self.setup_navigation_buttons()
+
+    def setup_navigation_buttons(self):
+
+        # Status checkable
+        self.button_system.setCheckable(True)
+        self.button_traffic_analysis.setCheckable(True)
+        self.button_settings.setCheckable(True)
+
+        # Set system tab as default
+        self.button_system.setChecked(True)
+        self.stacked_widget.setCurrentIndex(0)
+
+        # Connect signals
+        self.button_system.clicked.connect(lambda: self.switch_tab(0))
+        self.button_traffic_analysis.clicked.connect(lambda: self.switch_tab(1))
+        self.button_settings.clicked.connect(lambda: self.switch_tab(2))
+
+    def switch_tab(self, index):
+
+        # Reset all buttons
+        self.button_system.setChecked(False)
+        self.button_traffic_analysis.setChecked(False)
+        self.button_settings.setChecked(False)
+
+        # Activate the desired button
+        if index == 0:
+            self.button_system.setChecked(True)
+        elif index == 1:
+            self.button_traffic_analysis.setChecked(True)
+        elif index == 2:
+            self.button_settings.setChecked(True)
+
+        # Switch the tab
+        self.stacked_widget.setCurrentIndex(index)
+
+    def create_system_tab(self):
+
+        system_widget = QWidget()
+        system_layout = QVBoxLayout(system_widget)
+
+        # CHAT and HISTORY WIDGETS
         chat_and_history_frame = QFrame()
         chat_and_history_layout = QHBoxLayout(chat_and_history_frame)
         chat_and_history_layout.setSpacing(0)
         chat_and_history_layout.setContentsMargins(0, 0, 0, 0)
 
-        # 2.1.1 Splitter
+        # SPLITTER
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setHandleWidth(5)
 
-        # 2.2.1 CHAT WIDGET
+        # CHAT WIDGET
         self.chat_frame = QFrame()
         self.chat_frame.setObjectName("chat_frame")
         chat_layout = QVBoxLayout(self.chat_frame)
 
-        # 2.2.2 Message box
+        # Message box
         self.chat_message_box = QTextEdit()
         self.chat_message_box.setObjectName("chat_message_box")
         self.chat_message_box.setPlaceholderText("Діалог із експертною системою...")
 
-        # 2.2.3 Add objects to a layout
+        # Add objects to a chat layout
         chat_layout.addWidget(self.chat_message_box)
 
-        # 2.3.1 HISTORY WIDGET
+        # HISTORY WIDGET
         self.history_frame = QFrame()
         self.history_frame.setObjectName("history_frame")
         history_layout = QVBoxLayout(self.history_frame)
 
-        # 2.3.2 Search line and history title and list
+        # Search line and history title and list
 
         self.history_search = QLineEdit()
         self.history_search.setObjectName("history_search")
@@ -106,38 +153,43 @@ class MainWindow(QMainWindow):
         self.history_list = QListWidget()
         self.history_list.setObjectName("history_list")
 
-        # 2.3.3 Add objects to a layout
+        # Add objects to a history layout
         history_layout.addWidget(self.history_search)
         history_layout.addWidget(self.history_title)
         history_layout.addWidget(self.history_list)
 
-        # 2.1.2 Add objects to a layout
+        # Add objects to a splitter layout
         splitter.addWidget(self.chat_frame)
         splitter.addWidget(self.history_frame)
-        splitter.setSizes([600, 400])
+        splitter.setSizes([700, 300])
 
-        # 2.4 Add objects to a layout
+        # 2.4 Add objects to a chat_and_history layout
         chat_and_history_layout.addWidget(splitter)
 
-        # 3. SEND_FIELD WIDGET
-        self.send_field_frame = QFrame()
-        self.send_field_frame.setObjectName("send_field_frame")
-        send_field_layout = QHBoxLayout(self.send_field_frame)
+        system_layout.addWidget(chat_and_history_frame)
 
-        # 3.1 Send line and button
+        self.stacked_widget.addWidget(system_widget)
 
-        self.send_field_input = QLineEdit()
-        self.send_field_input.setObjectName("send_field_input")
-        self.send_field_input.setPlaceholderText("Введіть ваш запит...")
+    def create_traffic_analysis_tab(self):
 
-        self.send_field_button = QPushButton("Надіслати")
-        self.send_field_button.setObjectName("send_field_button")
+        traffic_analysis_widget = QWidget()
+        traffic_analysis_layout = QVBoxLayout(traffic_analysis_widget)
 
-        # 3.2 Add objects to a layout
-        send_field_layout.addWidget(self.send_field_input)
-        send_field_layout.addWidget(self.send_field_button)
+        # Plug
+        label = QLabel("Аналіз трафіку - вкладка в розробці")
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        traffic_analysis_layout.addWidget(label)
 
-        # 0.1 Add objects to a layout
-        central_layout.addWidget(self.menu_frame)
-        central_layout.addWidget(chat_and_history_frame, 1)
-        # central_layout.addWidget(self.send_field_frame)
+        self.stacked_widget.addWidget(traffic_analysis_widget)
+
+    def create_settings_tab(self):
+
+        settings_widget = QWidget()
+        settings_layout = QVBoxLayout(settings_widget)
+
+        # Plug
+        label = QLabel("Налаштування - вкладка в розробці")
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        settings_layout.addWidget(label)
+
+        self.stacked_widget.addWidget(settings_widget)

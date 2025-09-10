@@ -97,54 +97,13 @@ HISTORY_STYLES = """
 
 """
 
-SEND_FIELD_STYLES = """
-
-    QFrame#send_field_frame {
-        padding: 10px;
-        background-color: #ffffff;
-        border-top: 1px solid #bdc3c7;
-    }
-    
-    QLineEdit#send_field_input {
-        padding: 10px 15px;
-        background-color: #ffffff;
-        border: 3px solid #bdc3c7;
-        border-radius: 15px;
-        color: #2c3e50;
-    }
-
-    QLineEdit#send_field_input:focus {
-        border: 3px solid #3498db;
-    }
-
-    QPushButton#send_field_button {
-        padding: 15px 25px;
-        background-color: #3498db;
-        border: none;
-        border-radius: 15px;
-        color: white;
-        font-weight: bold;
-    }
-
-    QPushButton#send_field_button:hover {
-        background-color: #2980b9;
-    }
-
-"""
-
 
 def apply_styles(app):
 
     # Глобальні стилі
     app.setStyle("Fusion")
 
-    all_styles = (
-        MAIN_WINDOW_STYLES
-        + MENU_STYLES
-        + CHAT_STYLES
-        + HISTORY_STYLES
-        + SEND_FIELD_STYLES
-    )
+    all_styles = MAIN_WINDOW_STYLES + MENU_STYLES + CHAT_STYLES + HISTORY_STYLES
 
     app.setStyleSheet(all_styles)
 
