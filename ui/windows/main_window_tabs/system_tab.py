@@ -18,6 +18,72 @@ def create_system_tab(main_window):
     system_widget = QWidget()
     system_layout = QVBoxLayout(system_widget)
 
+    system_title = QLabel("Експертна система")
+    system_title.setObjectName("system_title")
+    system_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+    buttons_container = QFrame()
+    buttons_layout = QVBoxLayout(buttons_container)
+    buttons_layout.setSpacing(20)
+    buttons_layout.setContentsMargins(100, 50, 100, 50)
+
+    # Button New Session
+    button_new_session = QPushButton("📂 Нова сесія")
+    button_new_session.setObjectName("button_new_session")
+    button_new_session.clicked.connect(lambda: new_session(system_widget))
+
+    # Button Open Session
+    button_open_session = QPushButton("📂 Відкрити сесію")
+    button_open_session.setObjectName("button_open_session")
+    button_open_session.clicked.connect(lambda: open_session(system_widget))
+
+    # Add objects to a buttons layout
+    buttons_layout.addWidget(button_new_session)
+    buttons_layout.addWidget(button_open_session)
+
+    # Add objects to a buttons layout
+    system_layout.addWidget(system_title)
+    system_layout.addWidget(buttons_container)
+
+    main_window.stacked_widget.addWidget(system_widget)
+
+    return system_widget
+
+
+def new_session(system_widget):
+
+    while system_widget.layout().count():
+        child = system_widget.layout().takeAt(0)
+        if child.widget():
+            child.widget().deleteLater()
+
+    # Plug
+    label = QLabel("new_session")
+    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    system_widget.layout().addWidget(label)
+
+
+def open_session(system_widget):
+
+    clear_widget_and_layout(system_widget.layout())
+
+    # Plug
+    label = QLabel("open_session")
+    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    system_widget.layout().addWidget(label)
+
+
+def clear_widget_and_layout(system_widget):
+
+    while system_widget.layout().count():
+        child = system_widget.layout().takeAt(0)
+        if child.widget():
+            child.widget().deleteLater()
+        elif child.layout():
+            clear_widget_and_layout(child.layout())
+
+
+"""
     # CHAT and HISTORY WIDGETS
     chat_and_history_frame = QFrame()
     chat_and_history_layout = QHBoxLayout(chat_and_history_frame)
@@ -68,11 +134,11 @@ def create_system_tab(main_window):
     splitter.addWidget(main_window.history_frame)
     splitter.setSizes([700, 300])
 
-    # 2.4 Add objects to a chat_and_history layout
+    # Add objects to a chat and history layout
     chat_and_history_layout.addWidget(splitter)
 
+    # Add objects to a system layout
     system_layout.addWidget(chat_and_history_frame)
 
     main_window.stacked_widget.addWidget(system_widget)
-
-    return system_widget
+    """

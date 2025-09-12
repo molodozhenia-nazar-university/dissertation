@@ -45,6 +45,67 @@ MENU_STYLES = """
 
 """
 
+SYSTEM_STYLES = """
+
+QLabel#system_title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #2c3e50;
+    padding: 40px 20px 20px 20px;
+    background-color: transparent;
+}
+
+QFrame {
+    background-color: transparent;
+}
+
+QPushButton#button_new_session,
+QPushButton#button_open_session {
+    margin: 10px;
+    padding: 20px 30px;
+    background-color: #3498db;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    min-height: 70px;
+    min-width: 300px;
+}
+
+QPushButton#button_new_session:hover,
+QPushButton#button_open_session:hover {
+    background-color: #2980b9;
+}
+
+QPushButton#button_new_session:pressed,
+QPushButton#button_open_session:pressed {
+    background-color: #21618c;
+}
+
+QPushButton#button_new_session:focus,
+QPushButton#button_open_session:focus {
+    outline: 2px solid #2c3e50;
+    outline-offset: 2px;
+}
+
+/* Add styles */
+QPushButton#button_new_session {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                              stop: 0 #3498db, stop: 1 #2980b9);
+}
+
+QPushButton#button_open_session {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                              stop: 0 #27ae60, stop: 1 #219653);
+}
+
+QPushButton#button_open_session:hover {
+    background-color: #219653;
+}
+
+"""
+
 CHAT_STYLES = """
 
     QFrame#chat_frame {
@@ -103,7 +164,9 @@ def apply_styles(app):
     # Глобальні стилі
     app.setStyle("Fusion")
 
-    all_styles = MAIN_WINDOW_STYLES + MENU_STYLES + CHAT_STYLES + HISTORY_STYLES
+    all_styles = (
+        MAIN_WINDOW_STYLES + MENU_STYLES + SYSTEM_STYLES + CHAT_STYLES + HISTORY_STYLES
+    )
 
     app.setStyleSheet(all_styles)
 
