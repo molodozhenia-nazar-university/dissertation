@@ -28,10 +28,10 @@ MENU_STYLES = """
     QPushButton.navigation-button {
         padding: 10px 15px;
         border: none;
-        background-color: transparent;
-        color: #ecf0f1;
-        font-weight: bold;
         border-radius: 5px;
+        background-color: transparent;
+        font-weight: bold;
+        color: #ecf0f1;
     }
 
     QPushButton.navigation-button:hover {
@@ -48,56 +48,34 @@ MENU_STYLES = """
 SYSTEM_STYLES = """
 
 QLabel#system_title {
+    padding: 40px 20px 20px 20px;
     font-size: 32px;
     font-weight: bold;
     color: #2c3e50;
-    padding: 40px 20px 20px 20px;
-    background-color: transparent;
-}
-
-QFrame {
-    background-color: transparent;
 }
 
 QPushButton#button_new_session,
 QPushButton#button_open_session {
-    margin: 10px;
-    padding: 20px 30px;
-    background-color: #3498db;
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 18px;
+    width: 500px;
+    padding: 25px 30px;
+    font-size: 24px;
     font-weight: bold;
-    min-height: 70px;
-    min-width: 300px;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
 }
 
-QPushButton#button_new_session:hover,
-QPushButton#button_open_session:hover {
-    background-color: #2980b9;
-}
-
-QPushButton#button_new_session:pressed,
-QPushButton#button_open_session:pressed {
-    background-color: #21618c;
-}
-
-QPushButton#button_new_session:focus,
-QPushButton#button_open_session:focus {
-    outline: 2px solid #2c3e50;
-    outline-offset: 2px;
-}
-
-/* Add styles */
 QPushButton#button_new_session {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                              stop: 0 #3498db, stop: 1 #2980b9);
+    background-color: #3498db;
 }
 
 QPushButton#button_open_session {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                              stop: 0 #27ae60, stop: 1 #219653);
+    background-color: #27ae60;
+}
+
+
+QPushButton#button_new_session:hover{
+    background-color: #2980b9;
 }
 
 QPushButton#button_open_session:hover {
@@ -116,8 +94,8 @@ CHAT_STYLES = """
     QTextEdit#chat_message_box {
         padding: 15px;
         background-color: #ffffff;
-        border: none;
         color: #2c3e50;
+        border: none;
     }
 
     QTextEdit#chat_message_box:focus {
@@ -140,9 +118,9 @@ HISTORY_STYLES = """
     QLineEdit#history_search {
         padding: 10px 15px;
         background-color: #ffffff;
+        color: #2c3e50;
         border: 3px solid #bdc3c7;
         border-radius: 15px;
-        color: #2c3e50;
     }
 
     QLineEdit#history_search:focus {

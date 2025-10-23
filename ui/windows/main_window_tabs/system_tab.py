@@ -24,8 +24,8 @@ def create_system_tab(main_window):
 
     buttons_container = QFrame()
     buttons_layout = QVBoxLayout(buttons_container)
-    buttons_layout.setSpacing(20)
-    buttons_layout.setContentsMargins(100, 50, 100, 50)
+    buttons_layout.setSpacing(30)
+    buttons_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     # Button New Session
     button_new_session = QPushButton("📂 Нова сесія")
@@ -42,8 +42,11 @@ def create_system_tab(main_window):
     buttons_layout.addWidget(button_open_session)
 
     # Add objects to a buttons layout
+    system_layout.addStretch(1)
     system_layout.addWidget(system_title)
+    system_layout.addStretch(1)
     system_layout.addWidget(buttons_container)
+    system_layout.addStretch(1)
 
     main_window.stacked_widget.addWidget(system_widget)
 
@@ -52,10 +55,7 @@ def create_system_tab(main_window):
 
 def new_session(system_widget):
 
-    while system_widget.layout().count():
-        child = system_widget.layout().takeAt(0)
-        if child.widget():
-            child.widget().deleteLater()
+    clear_layout(system_widget.layout())
 
     # Plug
     label = QLabel("new_session")
@@ -65,7 +65,7 @@ def new_session(system_widget):
 
 def open_session(system_widget):
 
-    clear_widget_and_layout(system_widget.layout())
+    clear_layout(system_widget.layout())
 
     # Plug
     label = QLabel("open_session")
@@ -73,14 +73,15 @@ def open_session(system_widget):
     system_widget.layout().addWidget(label)
 
 
-def clear_widget_and_layout(system_widget):
+def clear_layout(layout):
 
-    while system_widget.layout().count():
-        child = system_widget.layout().takeAt(0)
+    if layout is None:
+        return
+
+    while layout.count():
+        child = layout.takeAt(0)
         if child.widget():
             child.widget().deleteLater()
-        elif child.layout():
-            clear_widget_and_layout(child.layout())
 
 
 """
