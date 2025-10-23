@@ -1,0 +1,154 @@
+{
+	"START": {
+		"level": 0,
+		"type": "user",
+		"question": "Яка проблема з інтернетом або мережею у вас виникла?",
+		"answers": {
+			"1. Повна відсутність інтернет-з'єднання (немає доступу ні до чого).": "Q_NO_INTERNET",
+			"2. Дуже низька швидкість інтернету або великі затримки (сайти відкриваються повільно, відео завантажується).": "Q_PERFORMANCE",
+			"3. Не працює один конкретний веб-сайт або онлайн-сервіс (інші сайти відкриваються).": "Q_ONE_SERVICE",
+			"4. Не працює будь-яка одна програма (браузер, гра, месенджер).": "Q_ONE_APP",
+			"5. Інтернет є, але з'єднання часто обривається і відновлюється.": "Q_INTERMITTENT",
+			"6. Не можу побачити/підключитися до інших комп'ютерів або принтерів у моїй домашній/офісній мережі.": "Q_LAN",
+			"7. З'явились дивні повідомлення, незрозуміла мережева активність або підозра на вірус.": "Q_SECURITY",
+			"8. Проблема з підключенням до Wi-Fi (не бачить мережу, не може підключитися, поганий сигнал).": "Q_WIFI_PROBLEM",
+			"9. Інше (специфічна ситуація, яка не підходить під запропоновані пункти).": "Q_OTHER"
+		}
+	},
+	"Q_NO_INTERNET": {
+		"level": 1,
+		"type": "system",
+		"action": "check_ping()",
+		"message": "Авто-перевірка: ping 8.8.8.8",
+		"notes": [
+			"Успішно (відповідь отримано) Q_IP_CONFIG",
+			"Неуспішно (немає відповіді) Q_PHYSICAL_CHECK"
+		]
+	},
+	"Q_PERFORMANCE": {
+		"level": 1,
+		"type": "system",
+		"action": "check_ping() and speed_test()",
+		"message": "Авто-перевірка: speed test та ping",
+		"notes": {
+			"Швидкість низька, ping високий, є втрати пакетів": "Q_NETWORK_CONGESTION",
+			"Показники в нормі, але проблема є": "Q_SW_CONFIG"
+		}
+	},
+	"Q_ONE_SERVICE": {
+		"level": 1,
+		"type": "system",
+		"action": "check_special_ping()",
+		"message": "Авто-перевірка: ping до IP-адреси проблемного сайту",
+		"notes": {
+			"Успішно (сайт доступний за IP)": "Q_DNS",
+			"Неуспішно (не доступний і за IP)": "Q_EXT_SERVER"
+		}
+	},
+	"Q_ONE_APP": {
+		"level": 1,
+		"type": "user",
+		"question": "Чи працює програма на іншому пристрої в тій же мережі?",
+		"answers": {
+			"1. Так": "Q_SW_FW",
+			"2. Ні": "Q_APP_CONFIG"
+		}
+	},
+	"Q_INTERMITTENT": {
+		"level": 1,
+		"type": "user",
+		"question": "Проблема з'являється при підключенні по Wi-Fi чи кабелю?",
+		"answers": {
+			"1. По Wi-Fi": "Q_WIFI",
+			"2. По кабелю": "Q_PHYSICAL_CABLE",
+			"3. По обом": "Q_PROVIDER"
+		}
+	},
+
+	"TEST START": {
+		"level": -1
+	},
+
+	"Q_SW_FW": {
+		"level": 2,
+		"type": "test",
+		"question": "Q_SW_FW",
+		"answers": {
+			"1. Так": "START",
+			"2. Ні": "START"
+		}
+	},
+	"Q_APP_CONFIG": {
+		"level": 2,
+		"type": "test",
+		"question": "Q_APP_CONFIG",
+		"answers": {
+			"1. Так": "START",
+			"2. Ні": "START"
+		}
+	},
+
+	"Q_WIFI": {
+		"level": 2,
+		"type": "test",
+		"question": "Q_WIFI",
+		"answers": {
+			"1. По Wi-Fi": "START",
+			"2. По кабелю": "START",
+			"3. По обом": "START"
+		}
+	},
+	"Q_PHYSICAL_CABLE": {
+		"level": 2,
+		"type": "test",
+		"question": "Q_PHYSICAL_CABLE",
+		"answers": {
+			"1. По Wi-Fi": "START",
+			"2. По кабелю": "START",
+			"3. По обом": "START"
+		}
+	},
+	"Q_PROVIDER": {
+		"level": 2,
+		"type": "test",
+		"question": "Q_PROVIDER",
+		"answers": {
+			"1. По Wi-Fi": "START",
+			"2. По кабелю": "START",
+			"3. По обом": "START"
+		}
+	},
+
+	"TEST END": {
+		"level": -1
+	},
+
+	"Q_LAN": {
+		"level": 1,
+		"type": "user",
+		"question": "У вас налаштована домашня мережа чи робочий домен?",
+		"answers": {
+			"Домашня мережа / робоча група": "Q_NET_COMP",
+			"Робочий домен": "Q_DOMAIN"
+		}
+	},
+	"Q_SECURITY": {
+		"level": 1,
+		"type": "system",
+		"action": "function()",
+		"message": "Авто-перевірка: сканування активних підключень",
+		"notes": {
+			"Виявлено невідомі з'єднання/висока активність": "Q_MALWARE",
+			"Активність здається нормальною": "Q_FW_BLOCK"
+		}
+	},
+	"Q_WIFI_PROBLEM": {
+		"level": 1,
+		"type": "user",
+		"question": "Пристрій не бачить мережі чи не може підключитися?",
+		"answers": {
+			"Не бачить жодних мереж": "Q_WIFI_HW",
+			"Бачить, але не підключається": "Q_WIFI_AUTH"
+		}
+	}
+}

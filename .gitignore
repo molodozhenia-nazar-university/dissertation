@@ -13,3 +13,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# temporary
+core/network.py
