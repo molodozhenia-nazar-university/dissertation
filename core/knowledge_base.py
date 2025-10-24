@@ -4,44 +4,128 @@ from PyQt6.QtWidgets import QPushButton
 
 class ChatManager:
 
-    def __init__(self):
+    def __init__(
+        self, system_title, system_description, question_title, answers_layout
+    ):
         self.knowledge_base = self.load_knowledge_base()
-        self.current_question_id = "START"
+        self.current_chat_id = "START"
+        self.system_title = system_title
+        self.system_description = system_description
+        self.question_title = question_title
+        self.answers_layout = answers_layout
 
     def load_knowledge_base(self):
         with open("core/knowledge_base.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def get_question_data(self, question_id):
-        return self.knowledge_base.get(question_id)
+    def get_chat_data(self, chat_id):
+        return self.knowledge_base.get(chat_id)
 
-    def generate_chat_content(self, question_title, answers_layout, next_question):
-        self.clear_answers(answers_layout)
-        question_data = self.get_question_data(self.current_question_id)
-        self.add_question_to_chat(question_data["question"], question_title)
-        self.create_answer_buttons(
-            question_data["answers"], answers_layout, next_question
-        )
+    # Generate Chat Content
 
-    def add_question_to_chat(self, question_information, question_title):
-        question_title.setText(f"{question_information}")
+    def generate_chat_content(self, next_chat):
 
-    def create_answer_buttons(self, answers_information, answers_layout, next_question):
-        for answer_text, next_id in answers_information.items():
-            button_answer = QPushButton(answer_text)
-            button_answer.setObjectName("button_answer")
-            button_answer.clicked.connect(lambda checked, id=next_id: next_question(id))
-            answers_layout.addWidget(button_answer)
+        # self.empty_system()
+        # self.empty_description()
+        self.empty_question()
+        self.clear_answers()
 
-    def clear_answers(self, layout):
-        if layout is None:
+        chat_data = self.get_chat_data(self.current_chat_id)
+
+        # Start Test
+        if not chat_data:
+            print(f"Немає даних для: {self.current_chat_id}")
             return
 
-        while layout.count():
-            child = layout.takeAt(0)
+        print(f"Чат: {self.current_chat_id}\nТип чату: {chat_data['type']}\n")
+        # End Test
+
+        if chat_data["type"] == "user":
+            self.handle_user(chat_data, next_chat)
+        elif chat_data["type"] == "system":
+            self.handle_system(chat_data, next_chat)
+
+    # Handle Chat
+
+    def handle_chat(self, next_chat_id, next_chat):
+        self.current_chat_id = next_chat_id
+        self.generate_chat_content(next_chat)
+
+    # Handle User
+
+    def add_question_to_chat(self, question_information):
+        self.question_title.setText(f"{question_information}")
+
+    def create_answer_buttons(self, answers_information, next_chat):
+        for answer_text, next_chat_id in answers_information.items():
+            button_answer = QPushButton(answer_text)
+            button_answer.setObjectName("button_answer")
+            button_answer.clicked.connect(
+                lambda checked, chat_id=next_chat_id: next_chat(chat_id)
+            )
+            self.answers_layout.addWidget(button_answer)
+
+    def handle_user(self, chat_data, next_chat):
+        self.add_question_to_chat(chat_data["question"])
+        self.create_answer_buttons(chat_data["answers"], next_chat)
+
+    # Handle System
+
+    def add_message_to_chat(self, message_information):
+        self.system_title.setText(f"{message_information}")
+
+    def add_description_to_chat(self, description_information):
+        self.system_description.setText(f"{description_information}")
+
+    def execute_action(self, action, next_chat):
+
+        try:
+
+            from core import test_network
+
+            function = getattr(test_network, action)
+            result = function()
+
+            # for object and dictionary
+            if hasattr(result, "description") and hasattr(result, "next_chat_id"):
+                self.add_description_to_chat(result.description)
+                print(f"function result - object\n")
+                next_chat(result.next_chat_id)
+            elif (
+                isinstance(result, dict)
+                and "description" in result
+                and "next_chat_id" in result
+            ):
+                self.add_description_to_chat(result["description"])
+                print(f"function result - dictionary\n")
+                next_chat(result["next_chat_id"])
+
+        except AttributeError:
+            print(f"Функція {action} не знайдена в network_test.py")
+        except Exception as e:
+            print(f"Помилка виконання {action}: {e}")
+
+    def handle_system(self, chat_data, next_chat):
+        self.add_message_to_chat(chat_data["message"])
+        self.execute_action(chat_data["action"], next_chat)
+        # self.add_description_to_chat()
+
+    # Clear Chat
+
+    def empty_system(self):
+        self.system_title.setText(f"")
+
+    def empty_description(self):
+        self.system_description.setText(f"")
+
+    def empty_question(self):
+        self.question_title.setText(f"")
+
+    def clear_answers(self):
+        if self.answers_layout is None:
+            return
+
+        while self.answers_layout.count():
+            child = self.answers_layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
-
-    def handle_answer(self, next_id, question_title, answers_layout, next_level):
-        self.current_question_id = next_id
-        self.generate_chat_content(question_title, answers_layout, next_level)

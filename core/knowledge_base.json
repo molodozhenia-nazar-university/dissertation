@@ -18,7 +18,7 @@
 	"Q_NO_INTERNET": {
 		"level": 1,
 		"type": "system",
-		"action": "check_ping()",
+		"action": "check_ping",
 		"message": "Авто-перевірка: ping 8.8.8.8",
 		"notes": [
 			"Успішно (відповідь отримано) Q_IP_CONFIG",
@@ -28,7 +28,7 @@
 	"Q_PERFORMANCE": {
 		"level": 1,
 		"type": "system",
-		"action": "check_ping() and speed_test()",
+		"action": "check_ping_and_speed_test",
 		"message": "Авто-перевірка: speed test та ping",
 		"notes": {
 			"Швидкість низька, ping високий, є втрати пакетів": "Q_NETWORK_CONGESTION",
@@ -38,7 +38,7 @@
 	"Q_ONE_SERVICE": {
 		"level": 1,
 		"type": "system",
-		"action": "check_special_ping()",
+		"action": "check_special_ping",
 		"message": "Авто-перевірка: ping до IP-адреси проблемного сайту",
 		"notes": {
 			"Успішно (сайт доступний за IP)": "Q_DNS",
@@ -71,7 +71,7 @@
 
 	"Q_SW_FW": {
 		"level": 2,
-		"type": "test",
+		"type": "user",
 		"question": "Q_SW_FW",
 		"answers": {
 			"1. Так": "START",
@@ -80,7 +80,7 @@
 	},
 	"Q_APP_CONFIG": {
 		"level": 2,
-		"type": "test",
+		"type": "user",
 		"question": "Q_APP_CONFIG",
 		"answers": {
 			"1. Так": "START",
@@ -90,7 +90,7 @@
 
 	"Q_WIFI": {
 		"level": 2,
-		"type": "test",
+		"type": "user",
 		"question": "Q_WIFI",
 		"answers": {
 			"1. По Wi-Fi": "START",
@@ -100,7 +100,7 @@
 	},
 	"Q_PHYSICAL_CABLE": {
 		"level": 2,
-		"type": "test",
+		"type": "user",
 		"question": "Q_PHYSICAL_CABLE",
 		"answers": {
 			"1. По Wi-Fi": "START",
@@ -110,8 +110,41 @@
 	},
 	"Q_PROVIDER": {
 		"level": 2,
-		"type": "test",
+		"type": "user",
 		"question": "Q_PROVIDER",
+		"answers": {
+			"1. По Wi-Fi": "START",
+			"2. По кабелю": "START",
+			"3. По обом": "START"
+		}
+	},
+
+	"Q_IP_CONFIG": {
+		"level": 2,
+		"type": "user",
+		"question": "Q_IP_CONFIG",
+		"answers": {
+			"1. По Wi-Fi": "START",
+			"2. По кабелю": "START",
+			"3. По обом": "START"
+		}
+	},
+
+	"Q_NETWORK_CONGESTION": {
+		"level": 2,
+		"type": "user",
+		"question": "Q_NETWORK_CONGESTION",
+		"answers": {
+			"1. По Wi-Fi": "START",
+			"2. По кабелю": "START",
+			"3. По обом": "START"
+		}
+	},
+
+	"Q_DNS": {
+		"level": 2,
+		"type": "user",
+		"question": "Q_DNS",
 		"answers": {
 			"1. По Wi-Fi": "START",
 			"2. По кабелю": "START",

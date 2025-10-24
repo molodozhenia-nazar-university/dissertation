@@ -75,6 +75,14 @@ def new_session(system_widget):
     chat_layout = QVBoxLayout(chat_frame)
 
     # Question
+    system_title = QLabel()
+    system_title.setObjectName("system_title")
+
+    # Question
+    system_description = QLabel()
+    system_description.setObjectName("system_description")
+
+    # Question
     question_title = QLabel()
     question_title.setObjectName("question_title")
 
@@ -83,6 +91,8 @@ def new_session(system_widget):
     answers_layout = QVBoxLayout(answers_container)
 
     # Add objects to a chat layout
+    chat_layout.addWidget(system_title)
+    chat_layout.addWidget(system_description)
     chat_layout.addWidget(question_title)
     chat_layout.addWidget(answers_container)
 
@@ -90,14 +100,14 @@ def new_session(system_widget):
 
     # CHAT_MANAGER START
 
-    chat_manager = ChatManager()
+    chat_manager = ChatManager(
+        system_title, system_description, question_title, answers_layout
+    )
 
-    def next_question(next_id):
-        chat_manager.handle_answer(
-            next_id, question_title, answers_layout, next_question
-        )
+    def next_chat(next_chat_id):
+        chat_manager.handle_chat(next_chat_id, next_chat)
 
-    chat_manager.generate_chat_content(question_title, answers_layout, next_question)
+    chat_manager.generate_chat_content(next_chat)
 
     # CHAT_MANAGER END
 
