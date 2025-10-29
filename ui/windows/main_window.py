@@ -6,9 +6,8 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QPushButton,
     QStackedWidget,
+    QStyle,
 )
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QStyle
 
 from ui.windows.main_window_tabs.system_tab import create_system_tab
 from ui.windows.main_window_tabs.traffic_analysis_tab import create_traffic_analysis_tab

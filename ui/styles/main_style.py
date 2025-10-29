@@ -1,5 +1,7 @@
 from PyQt6.QtGui import QFont
 
+from ui.styles.traffic_analysis_style import TRAFFIC_ANALYSIS_STYLES
+
 MAIN_WINDOW_STYLES = """
 
     QMainWindow {
@@ -73,8 +75,7 @@ QPushButton#button_open_session {
     background-color: #27ae60;
 }
 
-
-QPushButton#button_new_session:hover{
+QPushButton#button_new_session:hover {
     background-color: #2980b9;
 }
 
@@ -143,7 +144,12 @@ def apply_styles(app):
     app.setStyle("Fusion")
 
     all_styles = (
-        MAIN_WINDOW_STYLES + MENU_STYLES + SYSTEM_STYLES + CHAT_STYLES + HISTORY_STYLES
+        MAIN_WINDOW_STYLES
+        + MENU_STYLES
+        + SYSTEM_STYLES
+        + CHAT_STYLES
+        + HISTORY_STYLES
+        + TRAFFIC_ANALYSIS_STYLES
     )
 
     app.setStyleSheet(all_styles)
