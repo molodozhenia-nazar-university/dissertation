@@ -120,6 +120,9 @@ def create_traffic_analysis_tab(main_window):
 
 def create_file_analysis_interface(main_window):
 
+    # VARIABLE
+    selected_file_path = ""
+
     interface_widget = QWidget()
     interface_layout = QVBoxLayout(interface_widget)
     # interface_layout.setSpacing(30)
@@ -153,9 +156,24 @@ def create_file_analysis_interface(main_window):
     interface_layout.addWidget(control_widget)
     interface_layout.addWidget(result_text)
 
-    # CONNECTION
+    # Button Information
+    button_information = QPushButton("📄 Додаткова інформація")
+    interface_layout.addWidget(button_information)
 
-    selected_file_path = ""
+    def open_traffic_analysis_information_window(main_window):
+        if main_window.traffic_analysis_information.isVisible():
+            return
+        else:
+            main_window.traffic_analysis_information.show()
+            main_window.traffic_analysis_information.raise_()
+
+    button_information.clicked.connect(
+        lambda: open_traffic_analysis_information_window(main_window)
+    )
+
+    button_information.setEnabled(False)
+
+    # METHODS
 
     def browse_file():
         nonlocal selected_file_path
@@ -168,6 +186,7 @@ def create_file_analysis_interface(main_window):
         if file_path:
             selected_file_path = file_path
             file_label.setText(os.path.basename(file_path))
+            button_information.setEnabled(False)
 
     def analyze_file():
         if not selected_file_path:
@@ -217,6 +236,13 @@ def create_file_analysis_interface(main_window):
             result_string += f"• {recommendation}\n"
 
         result_text.setText(result_string)
+
+        # TRAFFIC ANALYSIS INFORMATION
+        main_window.traffic_analysis_information = TrafficAnalysisInformationWindow(
+            selected_file_path
+        )
+
+        button_information.setEnabled(True)
 
     button_browse.clicked.connect(browse_file)
     button_control.clicked.connect(analyze_file)

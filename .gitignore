@@ -20,6 +20,4 @@ packages.txt
 # temporary
 core/network.py
 core/network_plus.py
-ui/windows/traffic_analysis_information_window.py
-core/pcap_parser.py
 core/wavelet_analysis.py

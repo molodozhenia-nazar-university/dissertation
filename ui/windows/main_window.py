@@ -105,3 +105,10 @@ class MainWindow(QMainWindow):
 
         # Switch the tab
         self.stacked_widget.setCurrentIndex(index)
+
+    def closeEvent(self, event):
+        if hasattr(self, "traffic_analysis_information"):
+            child_window = self.traffic_analysis_information
+            if child_window is not None:
+                child_window.close()
+        event.accept()
