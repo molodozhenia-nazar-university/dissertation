@@ -17,7 +17,13 @@ from PyQt6.QtWidgets import (
     QGroupBox,  # new
     QProgressBar,  # new
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt
+
+
+from ui.windows.traffic_analysis_information_window import (
+    TrafficAnalysisInformationWindow,
+)
+from core.wavelet_analysis import wavelet_analysis
 
 
 def create_traffic_analysis_tab(main_window):
@@ -63,7 +69,7 @@ def create_traffic_analysis_tab(main_window):
     traffic_analysis_stacked_widget.setCurrentIndex(0)
 
     # => Open File Interface
-    file_analysis_widget = create_file_analysis_interface()
+    file_analysis_widget = create_file_analysis_interface(main_window)
     traffic_analysis_stacked_widget.addWidget(file_analysis_widget)
 
     # => Live Analysis Interface
@@ -112,17 +118,110 @@ def create_traffic_analysis_tab(main_window):
     return traffic_analysis_widget
 
 
-def create_file_analysis_interface():
+def create_file_analysis_interface(main_window):
 
-    buffer_widget = QWidget()
-    buffer_layout = QVBoxLayout(buffer_widget)
+    interface_widget = QWidget()
+    interface_layout = QVBoxLayout(interface_widget)
+    # interface_layout.setSpacing(30)
 
-    # Plug
-    label = QLabel("Вкладка в розробці")
-    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    buffer_layout.addWidget(label)
+    # FILE
+    file_widget = QWidget()
+    file_layout = QHBoxLayout(file_widget)
 
-    return buffer_widget
+    button_browse = QPushButton("📂 Обрати файл")
+    button_browse.setObjectName("button_browse")
+    file_layout.addWidget(button_browse)
+
+    file_label = QLabel("Файл не обрано")
+    file_label.setObjectName("file_label")
+    file_layout.addWidget(file_label)
+
+    # Button Control Analysis
+    control_widget = QWidget()
+    control_layout = QHBoxLayout(control_widget)
+
+    button_control = QPushButton("🔍 Почати аналіз")
+    button_control.setObjectName("button_control")
+    control_layout.addWidget(button_control)
+
+    # RESULT
+    result_text = QTextEdit()
+    result_text.setPlaceholderText("Тут будуть результати аналізу...")
+
+    # ASSEMBLE FILE ANALYSIS INTERFACE
+    interface_layout.addWidget(file_widget)
+    interface_layout.addWidget(control_widget)
+    interface_layout.addWidget(result_text)
+
+    # CONNECTION
+
+    selected_file_path = ""
+
+    def browse_file():
+        nonlocal selected_file_path
+        file_path, _ = QFileDialog.getOpenFileName(
+            None,
+            "Оберіть файл трафіку мережі",
+            "D:\\",
+            "Файли трафіку (*.cap *.pcap *.pcapng);;Усі файли (*)",
+        )
+        if file_path:
+            selected_file_path = file_path
+            file_label.setText(os.path.basename(file_path))
+
+    def analyze_file():
+        if not selected_file_path:
+            result_text.setText("❌ Будь ласка, оберіть файл для аналізу")
+            return
+
+        button_control.setEnabled(False)
+        result_text.setText("⏳ Виконується вейвлет-аналіз...")
+
+        complete_analysis()
+
+    # NEED CHANGE
+    def complete_analysis():
+
+        # MAYBE NEED OTHER PLACE
+        button_control.setEnabled(True)
+
+        # RESULTS
+        results = wavelet_analysis(selected_file_path, "db4", 6)
+
+        if "error" in results:
+            result_text.setText(f"❌ Помилка: {results['error']}")
+            return
+
+        # Форматування результатів
+        result_string = f"""✅ Аналіз завершено!
+
+📊 ЗАГАЛЬНА СТАТИСТИКА:
+• Пакетів проаналізовано: {results['summary']['total_packets']}
+• Тривалість аналізу: {results['summary']['analysis_duration']}
+• Вейвлет: {results['summary']['wavelet_type']} (рівень {results['summary']['wavelet_level']})
+
+🚨 ВИЯВЛЕНІ АНОМАЛІЇ:
+• Спайків трафіку: {results['detected_anomalies']['volume_anomalies']}
+• Аномалій пакетів: {results['detected_anomalies']['packet_anomalies']} 
+• Протокольних аномалій: {results['detected_anomalies']['protocol_anomalies']}
+• Змін тренду: {results['detected_anomalies']['trend_changes']}
+
+📈 РОЗПОДІЛ ПРОТОКОЛІВ:
+"""
+
+        for protocol, count in results["protocol_distribution"].items():
+            result_string += f"• {protocol}: {count} пакетів\n"
+
+        result_string += "💡 РЕКОМЕНДАЦІЇ:\n"
+        for recommendation in results["recommendations"]:
+            result_string += f"• {recommendation}\n"
+
+        result_text.setText(result_string)
+
+    button_browse.clicked.connect(browse_file)
+    button_control.clicked.connect(analyze_file)
+
+    return interface_widget
 
 
 def create_live_analysis_interface():
