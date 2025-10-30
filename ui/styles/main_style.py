@@ -1,6 +1,9 @@
 from PyQt6.QtGui import QFont
 
 from ui.styles.traffic_analysis_style import TRAFFIC_ANALYSIS_STYLES
+from ui.styles.traffic_analysis_information_style import (
+    TRAFFIC_ANALYSIS_INFORMATION_STYLES,
+)
 
 MAIN_WINDOW_STYLES = """
 
@@ -150,6 +153,7 @@ def apply_styles(app):
         + CHAT_STYLES
         + HISTORY_STYLES
         + TRAFFIC_ANALYSIS_STYLES
+        + TRAFFIC_ANALYSIS_INFORMATION_STYLES
     )
 
     app.setStyleSheet(all_styles)

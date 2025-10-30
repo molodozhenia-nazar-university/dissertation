@@ -125,7 +125,6 @@ def create_file_analysis_interface(main_window):
 
     interface_widget = QWidget()
     interface_layout = QVBoxLayout(interface_widget)
-    # interface_layout.setSpacing(30)
 
     # FILE
     file_widget = QWidget()
