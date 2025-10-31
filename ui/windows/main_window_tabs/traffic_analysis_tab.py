@@ -6,24 +6,26 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QTextEdit,
     QPushButton,
     QStackedWidget,
-    QFileDialog,  # new
-    QComboBox,  # new
-    QSpinBox,  # new
-    QDoubleSpinBox,  # new
-    QCheckBox,  # new
-    QGroupBox,  # new
-    QProgressBar,  # new
+    QFileDialog,
+    QGroupBox,
+    QComboBox,
+    QSpinBox,
+    QProgressBar,  # need use
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 
 
 from ui.windows.traffic_analysis_information_window import (
     TrafficAnalysisInformationWindow,
 )
+
 from core.wavelet_analysis import wavelet_analysis
+from core.capture import get_interfaces
+from core.capture import start_capture
 
 
 def create_traffic_analysis_tab(main_window):
@@ -73,7 +75,7 @@ def create_traffic_analysis_tab(main_window):
     traffic_analysis_stacked_widget.addWidget(file_analysis_widget)
 
     # => Live Analysis Interface
-    live_analysis_widget = create_live_analysis_interface()
+    live_analysis_widget = create_live_analysis_interface(main_window)
     traffic_analysis_stacked_widget.addWidget(live_analysis_widget)
 
     # BUTTON BACK
@@ -249,14 +251,163 @@ def create_file_analysis_interface(main_window):
     return interface_widget
 
 
-def create_live_analysis_interface():
+def create_live_analysis_interface(main_window):
 
-    buffer_widget = QWidget()
-    buffer_layout = QVBoxLayout(buffer_widget)
+    # VARIABLE
+    timer = QTimer()
+    is_monitoring = False
 
-    # Plug
-    label = QLabel("Вкладка в розробці")
-    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    buffer_layout.addWidget(label)
+    interface_widget = QWidget()
+    interface_layout = QVBoxLayout(interface_widget)
 
-    return buffer_widget
+    # SETTINGS MONITORING
+    settings_group = QGroupBox("Налаштування моніторингу")
+    settings_layout = QVBoxLayout(settings_group)
+
+    # Network interface
+    network_interface_layout = QHBoxLayout()
+
+    network_interface_label = QLabel("Мережевий інтерфейс:")
+    network_interface_layout.addWidget(network_interface_label)
+
+    network_interface_combo = QComboBox()
+
+    dictionary_network_interfaces = get_interfaces()
+    network_interface_combo.addItems(dictionary_network_interfaces.keys())
+    """
+    network_interfaces = get_interfaces()
+    network_interface_combo.addItems(network_interfaces)
+    """
+    network_interface_layout.addWidget(network_interface_combo)
+
+    network_interface_layout.addStretch()
+
+    # Capture duration
+    duration_layout = QHBoxLayout()
+
+    duration_label = QLabel("Тривалість захоплення трафіку мережі:")
+    duration_layout.addWidget(duration_label)
+
+    duration_spin = QSpinBox()
+
+    duration_spin.setRange(30, 600)
+    duration_spin.setValue(30)
+
+    duration_spin.setSuffix(" сек")
+
+    duration_layout.addWidget(duration_spin)
+
+    duration_layout.addStretch()
+
+    # Size buffer
+    buffer_layout = QHBoxLayout()
+
+    buffer_label = QLabel("Розмір буфера:")
+    buffer_layout.addWidget(buffer_label)
+
+    buffer_spin = QSpinBox()
+
+    buffer_spin.setRange(1, 100)
+    buffer_spin.setValue(50)
+
+    buffer_spin.setSuffix(" МБ")
+
+    buffer_layout.addWidget(buffer_spin)
+
+    buffer_layout.addStretch()
+
+    # Add objects to a settings layout
+    settings_layout.addLayout(network_interface_layout)
+    settings_layout.addLayout(duration_layout)
+    settings_layout.addLayout(buffer_layout)
+
+    # Button Control Monitoring
+
+    control_layout = QHBoxLayout()
+    button_control_start = QPushButton("▶️ Почати моніторинг")
+    button_control_stop = QPushButton("⏹️ Зупинити моніторинг")
+    button_control_stop.setEnabled(False)
+
+    control_layout.addWidget(button_control_start)
+    control_layout.addWidget(button_control_stop)
+
+    control_layout.addStretch()
+
+    # RESULT
+    result_group = QGroupBox("Результати моніторингу в реальному часі")
+    result_layout = QVBoxLayout(result_group)
+
+    result_text = QTextEdit()
+    result_text.setReadOnly(True)
+    result_text.setPlaceholderText("Статус моніторингу: не активний")
+
+    result_layout.addWidget(result_text)
+
+    # Add objects to a interface layout
+    interface_layout.addWidget(settings_group)
+    interface_layout.addLayout(control_layout)
+    interface_layout.addWidget(result_group)
+    interface_layout.addStretch()
+
+    # METHODS
+
+    def update_status_result(text):
+        result_text.append(text)
+
+    def start_monitoring():
+
+        nonlocal is_monitoring
+        is_monitoring = True
+        button_control_start.setEnabled(False)
+        button_control_stop.setEnabled(True)
+
+        # Change result
+        result_text.clear()
+        update_status_result("🟢 Моніторинг активний...\n")
+
+        # Folder for save file
+        os.makedirs("live_traffic", exist_ok=True)
+        output_path = os.path.join("live_traffic", "live_traffic.pcap")
+
+        # Interface for monitoring
+        display_name_interface = network_interface_combo.currentText()
+        system_name_interface = dictionary_network_interfaces[display_name_interface]
+
+        # Duration for monitoring
+        duration = duration_spin.value()
+
+        # Change result
+        update_status_result(f"📡 Захоплення трафіку з {display_name_interface}")
+        update_status_result(f"🕒 Тривалість: {duration} сек")
+
+        # CAPTURE
+        start_capture(
+            system_name_interface,
+            duration,
+            output_path,
+            update_status_result,
+        )
+
+        # STOP TIME
+        timer.singleShot(duration * 1000, stop_monitoring)
+
+    def stop_monitoring():
+
+        nonlocal is_monitoring
+
+        if not is_monitoring:
+            return
+
+        is_monitoring = False
+        button_control_start.setEnabled(True)
+        button_control_stop.setEnabled(False)
+
+        update_status_result("\n🔴 Моніторинг завершено.")
+        update_status_result(
+            f"📁 Результат збережено у: live_traffic/live_traffic.pcap"
+        )
+
+    button_control_start.clicked.connect(start_monitoring)
+    button_control_stop.clicked.connect(stop_monitoring)
+
+    return interface_widget

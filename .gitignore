@@ -3,6 +3,8 @@ venv/
 build/
 dist/
 backup/
+live_traffic/
+.vscode/
 
 # files
 main.spec

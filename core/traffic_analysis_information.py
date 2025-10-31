@@ -5,10 +5,7 @@ pcap_packets = []
 
 
 def download_packets(file_path):
-    """
-    Завантажує пакети з pcap і повертає список словників із ключами:
-    No, Time, Source, Destination, Protocol, Length, Info
-    """
+
     global pcap_packets
     pcap_packets = rdpcap(file_path)
 
