@@ -2,11 +2,14 @@
 venv/
 build/
 dist/
+live_traffic/
+.vscode/
 
 # files
 main.spec
 python_commands.md
 buffer.md
+packages.txt
 
 # Python cache
 __pycache__/
@@ -17,3 +20,4 @@ __pycache__/
 # temporary
 core/network.py
 core/network_plus.py
+core/wavelet_analysis.py

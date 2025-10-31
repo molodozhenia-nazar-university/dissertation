@@ -15,7 +15,7 @@ class ChatManager:
         self.answers_layout = answers_layout
 
     def load_knowledge_base(self):
-        with open("core/knowledge_base.json", "r", encoding="utf-8") as f:
+        with open("knowledge_base/knowledge_base.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
     def get_chat_data(self, chat_id):
