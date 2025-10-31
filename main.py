@@ -1,5 +1,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication
+
 from ui.styles.main_style import apply_styles
 from ui.windows.main_window import MainWindow
 

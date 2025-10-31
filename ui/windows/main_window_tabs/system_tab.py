@@ -7,7 +7,6 @@ from PyQt6.QtWidgets import (
     QLabel,
     QListWidget,
     QLineEdit,
-    QTextEdit,
     QPushButton,
 )
 from PyQt6.QtCore import Qt
@@ -43,7 +42,7 @@ def create_system_tab(main_window):
     buttons_layout.addWidget(button_new_session)
     buttons_layout.addWidget(button_open_session)
 
-    # Add objects to a buttons layout
+    # Add objects to a system layout
     system_layout.addStretch(1)
     system_layout.addWidget(system_title)
     system_layout.addStretch(1)
@@ -74,11 +73,11 @@ def new_session(system_widget):
     chat_frame.setObjectName("chat_frame")
     chat_layout = QVBoxLayout(chat_frame)
 
-    # Question
+    # System - Action Title
     system_title = QLabel()
     system_title.setObjectName("system_title")
 
-    # Question
+    # Description
     system_description = QLabel()
     system_description.setObjectName("system_description")
 

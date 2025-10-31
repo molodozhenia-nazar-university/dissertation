@@ -2,6 +2,7 @@
 venv/
 build/
 dist/
+backup/
 live_traffic/
 .vscode/
 
@@ -16,6 +17,9 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# lib / packages
+packages.txt
 
 # temporary
 core/network.py
