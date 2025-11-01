@@ -52,39 +52,39 @@ MENU_STYLES = """
 
 SYSTEM_STYLES = """
 
-QLabel#system_title {
-    padding: 40px 20px 20px 20px;
-    font-size: 32px;
-    font-weight: bold;
-    color: #2c3e50;
-}
+    QLabel#system_title {
+        padding: 40px 20px 20px 20px;
+        font-size: 32px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
 
-QPushButton#button_new_session,
-QPushButton#button_open_session {
-    width: 500px;
-    padding: 25px 30px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #ffffff;
-    border: none;
-    border-radius: 10px;
-}
+    QPushButton#button_new_session,
+    QPushButton#button_open_session {
+        width: 500px;
+        padding: 25px 30px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+    }
 
-QPushButton#button_new_session {
-    background-color: #3498db;
-}
+    QPushButton#button_new_session {
+        background-color: #3498db;
+    }
 
-QPushButton#button_open_session {
-    background-color: #27ae60;
-}
+    QPushButton#button_open_session {
+        background-color: #27ae60;
+    }
 
-QPushButton#button_new_session:hover {
-    background-color: #2980b9;
-}
+    QPushButton#button_new_session:hover {
+        background-color: #2980b9;
+    }
 
-QPushButton#button_open_session:hover {
-    background-color: #219653;
-}
+    QPushButton#button_open_session:hover {
+        background-color: #219653;
+    }
 
 """
 
@@ -92,18 +92,62 @@ CHAT_STYLES = """
 
     QFrame#chat_frame {
         background-color: #ffffff;
-        border-right: 1px solid #bdc3c7;
+        border: none;
     }
 
-    QTextEdit#chat_message_box {
-        padding: 15px;
+    QLabel#action_title {
         background-color: #ffffff;
+        font-size: 24px;
+        font-weight: bold;
         color: #2c3e50;
-        border: none;
+        padding: 0px 20px 0px 20px;
     }
 
-    QTextEdit#chat_message_box:focus {
+    QLabel#description_title {
+        font-size: 20px;
+        color: #2c3e50;
+        padding: 0px 20px 0px 20px;
+    }
+
+    QLabel#question_title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        padding: 0px 20px 0px 20px;
+    }
+
+    QLabel#recommendation_title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+        padding: 0px 20px 0px 20px;
+    }
+
+    QFrame#answers_container {
+        background-color: transparent;
+        margin: 0px 0px 0px 0px;
+    }
+
+    QPushButton#button_answer {
+        padding: 10px 15px;
+        text-align: left;
+        font-size: 20px;
+        font-weight: bold;
+        color: #ffffff;
+        background-color: #3498db;
         border: none;
+        border-radius: 5px;
+    }
+
+    QPushButton#button_answer:hover {
+        background-color: #2980b9;
+    }
+
+    QLabel#result_title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        padding: 0px 20px 0px 20px;
     }
 
 """

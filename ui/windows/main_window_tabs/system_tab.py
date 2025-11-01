@@ -72,35 +72,59 @@ def new_session(system_widget):
     chat_frame = QFrame()
     chat_frame.setObjectName("chat_frame")
     chat_layout = QVBoxLayout(chat_frame)
+    chat_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
     # System - Action Title
-    system_title = QLabel()
-    system_title.setObjectName("system_title")
+    action_title = QLabel()
+    action_title.setObjectName("action_title")
+    action_title.setWordWrap(True)
+    action_title.setVisible(False)
 
     # Description
-    system_description = QLabel()
-    system_description.setObjectName("system_description")
+    description_title = QLabel()
+    description_title.setObjectName("description_title")
+    description_title.setWordWrap(True)
+    description_title.setVisible(False)
 
     # Question
     question_title = QLabel()
     question_title.setObjectName("question_title")
+    question_title.setWordWrap(True)
+
+    # Recommendation
+    recommendation_title = QLabel()
+    recommendation_title.setObjectName("recommendation_title")
+    recommendation_title.setWordWrap(True)
+    recommendation_title.setVisible(False)
 
     # Container for answers
     answers_container = QFrame()
+    answers_container.setObjectName("answers_container")
     answers_layout = QVBoxLayout(answers_container)
 
-    # Add objects to a chat layout
-    chat_layout.addWidget(system_title)
-    chat_layout.addWidget(system_description)
-    chat_layout.addWidget(question_title)
-    chat_layout.addWidget(answers_container)
+    # Result
+    result_title = QLabel()
+    result_title.setObjectName("result_title")
+    result_title.setWordWrap(True)
+    result_title.setVisible(False)
 
-    system_widget.layout().addWidget(chat_frame)
+    # Add objects to a chat layout
+    chat_layout.addWidget(action_title)
+    chat_layout.addWidget(description_title)
+    chat_layout.addWidget(question_title)
+    chat_layout.addWidget(recommendation_title)
+    chat_layout.addWidget(answers_container)
+    chat_layout.addWidget(result_title)
 
     # CHAT_MANAGER START
 
     chat_manager = ChatManager(
-        system_title, system_description, question_title, answers_layout
+        action_title,
+        description_title,
+        question_title,
+        recommendation_title,
+        answers_layout,
+        result_title,
     )
 
     def next_chat(next_chat_id):
