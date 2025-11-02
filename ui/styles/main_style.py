@@ -150,6 +150,13 @@ CHAT_STYLES = """
         padding: 0px 20px 0px 20px;
     }
 
+    QLabel#report_title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        padding: 0px 20px 0px 20px;
+    }
+
 """
 
 HISTORY_STYLES = """

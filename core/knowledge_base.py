@@ -1,5 +1,5 @@
 import json
-from PyQt6.QtWidgets import QPushButton, QSizePolicy
+from PyQt6.QtWidgets import QPushButton
 
 
 class ChatManager:
@@ -12,6 +12,8 @@ class ChatManager:
         recommendation_title,
         answers_layout,
         result_title,
+        report_title,
+        button_save_and_reload,
     ):
         self.knowledge_base = self.load_knowledge_base()
         self.current_chat_id = "START"
@@ -21,6 +23,8 @@ class ChatManager:
         self.recommendation_title = recommendation_title
         self.answers_layout = answers_layout
         self.result_title = result_title
+        self.report_title = report_title
+        self.button_save_and_reload = button_save_and_reload
 
     def load_knowledge_base(self):
         with open("knowledge_base/knowledge_base.json", "r", encoding="utf-8") as f:
@@ -38,7 +42,7 @@ class ChatManager:
         self.empty_question()
         self.empty_recommendation()
         self.clear_answers()
-        #  self.empty_result()
+        self.empty_result()
 
         chat_data = self.get_chat_data(self.current_chat_id)
 
@@ -54,6 +58,9 @@ class ChatManager:
             self.handle_user(chat_data, next_chat)
         elif chat_data["type"] == "system":
             self.handle_system(chat_data, next_chat)
+        elif chat_data["type"] == "report":
+            self.handle_user(chat_data, next_chat)
+            self.handle_report(chat_data)
 
     # Handle Chat
 
@@ -98,14 +105,16 @@ class ChatManager:
 
     def handle_user(self, chat_data, next_chat):
         self.add_question_to_chat(chat_data.get("question", ""))
-        self.add_recommendation_to_chat(chat_data.get("recommendation", ""))
+        self.add_recommendation_to_chat(
+            "\n".join(chat_data.get("recommendation") or [])
+        )
         answers = chat_data.get("answers") or {}
         if answers:
             self.create_answer_buttons(answers, next_chat)
             self.answers_layout.parentWidget().setVisible(True)
         else:
             self.answers_layout.parentWidget().setVisible(False)
-        self.add_result_to_chat(chat_data.get("result", ""))
+        self.add_result_to_chat("\n".join(chat_data.get("result") or []))
 
     # Handle System
 
@@ -154,6 +163,16 @@ class ChatManager:
     def handle_system(self, chat_data, next_chat):
         self.add_message_to_chat(chat_data["message"])
         self.execute_action(chat_data["action"], next_chat)
+
+    # Handle Report
+
+    def add_report_to_chat(self, report_information):
+        self.report_title.setText(f"{report_information}")
+        self.report_title.setVisible(True)
+
+    def handle_report(self, chat_data):
+        self.add_report_to_chat("\n".join(chat_data.get("report") or []))
+        self.button_save_and_reload.setVisible(True)
 
     # Clear Chat
 

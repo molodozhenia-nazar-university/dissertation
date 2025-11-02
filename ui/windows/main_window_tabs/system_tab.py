@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
     QSplitter,
     QVBoxLayout,
     QHBoxLayout,
+    QStackedWidget,
     QLabel,
     QListWidget,
     QLineEdit,
@@ -15,6 +16,9 @@ from core.knowledge_base import ChatManager
 
 
 def create_system_tab(main_window):
+
+    # STACKED WIDGET FOR SYSTEM AND PAGES
+    system_and_pages_stacked_widget = QStackedWidget()
 
     system_widget = QWidget()
     system_layout = QVBoxLayout(system_widget)
@@ -28,15 +32,23 @@ def create_system_tab(main_window):
     buttons_layout.setSpacing(30)
     buttons_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+    # PAGE
+    system_page_widget = QWidget()
+    system_page_layout = QVBoxLayout(system_page_widget)
+
     # Button New Session
     button_new_session = QPushButton("📂 Нова сесія")
     button_new_session.setObjectName("button_new_session")
-    button_new_session.clicked.connect(lambda: new_session(system_widget))
+    button_new_session.clicked.connect(
+        lambda: new_session(system_and_pages_stacked_widget, system_page_widget)
+    )
 
     # Button Open Session
     button_open_session = QPushButton("📂 Відкрити сесію")
     button_open_session.setObjectName("button_open_session")
-    button_open_session.clicked.connect(lambda: open_session(system_widget))
+    button_open_session.clicked.connect(
+        lambda: open_session(system_and_pages_stacked_widget, system_page_widget)
+    )
 
     # Add objects to a buttons layout
     buttons_layout.addWidget(button_new_session)
@@ -49,14 +61,20 @@ def create_system_tab(main_window):
     system_layout.addWidget(buttons_container)
     system_layout.addStretch(1)
 
-    main_window.stacked_widget.addWidget(system_widget)
+    # Add object to a system and pages stacked layout
+    system_and_pages_stacked_widget.addWidget(system_widget)
+    system_and_pages_stacked_widget.addWidget(system_page_widget)
 
-    return system_widget
+    system_and_pages_stacked_widget.setCurrentIndex(0)
+
+    main_window.stacked_widget.addWidget(system_and_pages_stacked_widget)
+
+    return system_and_pages_stacked_widget
 
 
-def new_session(system_widget):
+def new_session(system_and_pages_stacked_widget, system_page_widget):
 
-    clear_layout(system_widget.layout())
+    clear_layout(system_page_widget.layout())
 
     # CHAT and HISTORY WIDGETS
     chat_and_history_frame = QFrame()
@@ -108,6 +126,20 @@ def new_session(system_widget):
     result_title.setWordWrap(True)
     result_title.setVisible(False)
 
+    # Result
+    report_title = QLabel()
+    report_title.setObjectName("report_title")
+    report_title.setWordWrap(True)
+    report_title.setVisible(False)
+
+    # BUTTON SAVE AND RELOAD
+    button_save_and_reload = QPushButton("Завершити")
+    button_save_and_reload.setObjectName("button_save_and_reload")
+    button_save_and_reload.setVisible(False)
+    button_save_and_reload.clicked.connect(
+        lambda: system_and_pages_stacked_widget.setCurrentIndex(0)
+    )
+
     # Add objects to a chat layout
     chat_layout.addWidget(action_title)
     chat_layout.addWidget(description_title)
@@ -115,6 +147,9 @@ def new_session(system_widget):
     chat_layout.addWidget(recommendation_title)
     chat_layout.addWidget(answers_container)
     chat_layout.addWidget(result_title)
+    chat_layout.addWidget(report_title)
+    chat_layout.addStretch(1)
+    chat_layout.addWidget(button_save_and_reload)
 
     # CHAT_MANAGER START
 
@@ -125,6 +160,8 @@ def new_session(system_widget):
         recommendation_title,
         answers_layout,
         result_title,
+        report_title,
+        button_save_and_reload,
     )
 
     def next_chat(next_chat_id):
@@ -164,17 +201,32 @@ def new_session(system_widget):
     chat_and_history_layout.addWidget(splitter)
 
     # Add objects to a system layout
-    system_widget.layout().addWidget(chat_and_history_frame)
+    system_page_widget.layout().addWidget(chat_and_history_frame)
+
+    system_and_pages_stacked_widget.setCurrentIndex(1)
 
 
-def open_session(system_widget):
+def open_session(system_and_pages_stacked_widget, system_page_widget):
 
-    clear_layout(system_widget.layout())
+    clear_layout(system_page_widget.layout())
 
     # Plug
     label = QLabel("open_session")
     label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    system_widget.layout().addWidget(label)
+    system_page_widget.layout().addWidget(label)
+
+    # BUTTON SAVE AND RELOAD
+    button_save_and_reload = QPushButton("Завершити")
+    button_save_and_reload.setObjectName("button_save_and_reload")
+    button_save_and_reload.setVisible(False)
+    button_save_and_reload.clicked.connect(
+        lambda: system_and_pages_stacked_widget.setCurrentIndex(0)
+    )
+
+    system_page_widget.layout().addStretch(1)
+    system_page_widget.layout().addWidget(button_save_and_reload)
+
+    system_and_pages_stacked_widget.setCurrentIndex(1)
 
 
 def clear_layout(layout):
