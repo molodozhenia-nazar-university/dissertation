@@ -10,6 +10,7 @@ live_traffic/
 main.spec
 python_commands.md
 buffer.md
+task.md
 
 # Python cache
 __pycache__/

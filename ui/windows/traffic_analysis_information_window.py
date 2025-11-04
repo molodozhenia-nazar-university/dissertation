@@ -6,10 +6,15 @@ from PyQt6.QtWidgets import (
     QTextEdit,
     QSplitter,
     QStyle,
+    QTreeWidget,
+    QTreeWidgetItem,
 )
 from PyQt6.QtCore import Qt
 
 from core.traffic_analysis_information import download_packets, get_details
+
+from core.traffic_analysis_information import get_packet_layers, get_packet_hexdump
+
 
 from PyQt6.QtWidgets import QHeaderView
 
@@ -68,13 +73,25 @@ class TrafficAnalysisInformationWindow(QWidget):
         splitter.addWidget(self.table_packets)
 
         # PACKET DETAILS
-        self.packet_details = QTextEdit()
-        self.packet_details.setReadOnly(True)
-        splitter.addWidget(self.packet_details)
+        splitter_details = QSplitter(Qt.Orientation.Horizontal)
+        splitter_details.setHandleWidth(5)
+        splitter.addWidget(splitter_details)  # splitter plus details splitter
+
+        self.packet_tree = QTreeWidget()
+        self.packet_tree.setHeaderHidden(True)
+        splitter_details.addWidget(self.packet_tree)
+
+        self.packet_hexdump = QTextEdit()
+        self.packet_hexdump.setReadOnly(True)
+        splitter_details.addWidget(self.packet_hexdump)
 
         # DOWNLOAD PACKETS
         packets = download_packets(file_path)
         self.load_packets(packets)
+
+        # DOWNLOAD DEFAULT DETAILS
+        self.download_details(0)
+        self.table_packets.selectRow(0)
 
         # DOWNLOAD DETAILS
         self.table_packets.cellClicked.connect(self.download_details)
@@ -90,7 +107,21 @@ class TrafficAnalysisInformationWindow(QWidget):
             self.table_packets.setItem(row, 5, QTableWidgetItem(str(packet["Length"])))
             self.table_packets.setItem(row, 6, QTableWidgetItem(packet["Information"]))
 
-    def download_details(self, index):
+    def download_details_old(self, index):
         if index >= 0:
             details = get_details(index)
             self.packet_details.setText(details)
+
+    def download_details(self, index):
+        if index < 0:
+            return
+
+        self.packet_tree.clear()
+        layers = get_packet_layers(index)
+        for layer_name, fields in layers.items():
+            parent = QTreeWidgetItem([layer_name])
+            for key, value in fields.items():
+                QTreeWidgetItem(parent, [f"{key}: {value}"])
+            self.packet_tree.addTopLevelItem(parent)
+
+        self.packet_hexdump.setText(get_packet_hexdump(index))
