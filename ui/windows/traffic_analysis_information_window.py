@@ -8,15 +8,20 @@ from PyQt6.QtWidgets import (
     QStyle,
     QTreeWidget,
     QTreeWidgetItem,
+    QHeaderView,
+    QMenu,
+    QMenuBar,
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction
+
+from ui.windows.traffic_analysis_visualization_window import (
+    TrafficAnalysisVisualization,
+)
 
 from core.traffic_analysis_information import download_packets, get_details
 
 from core.traffic_analysis_information import get_packet_layers, get_packet_hexdump
-
-
-from PyQt6.QtWidgets import QHeaderView
 
 
 class TrafficAnalysisInformationWindow(QWidget):
@@ -32,6 +37,35 @@ class TrafficAnalysisInformationWindow(QWidget):
         self.showMaximized()
 
         information_layout = QVBoxLayout(self)
+
+        # MENU VISUALIZATION
+        menu_visualization_bar = QMenuBar(self)
+        menu_visualization = QMenu("Візуалізація", self)
+
+        visualization_items = [
+            "Traffic over Time",
+            "Inbound vs Outbound Traffic",
+            "Top Talkers (Active IPs)",
+            "Protocol Distribution",
+            "RTT / Delay / Jitter",
+            "TCP Retransmissions",
+            "HTTP Responses",
+            "DNS Queries",
+            "Network Map",
+            "Heatmap (Wavelet)",
+            "Latency Variability",
+            "Protocol Volume over Time",
+        ]
+
+        for item in visualization_items:
+            action = QAction(item, self)
+            action.triggered.connect(
+                lambda checked, name=item: self.open_visualization(name)
+            )
+            menu_visualization.addAction(action)
+
+        menu_visualization_bar.addMenu(menu_visualization)
+        information_layout.setMenuBar(menu_visualization_bar)
 
         # SPLITTER
         splitter = QSplitter(Qt.Orientation.Vertical)
@@ -125,3 +159,10 @@ class TrafficAnalysisInformationWindow(QWidget):
             self.packet_tree.addTopLevelItem(parent)
 
         self.packet_hexdump.setText(get_packet_hexdump(index))
+
+    def open_visualization(self, visualization_name):
+        self.traffic_analysis_visualization = TrafficAnalysisVisualization(
+            self.file_path, visualization_name
+        )
+        self.traffic_analysis_visualization.show()
+        self.traffic_analysis_visualization.raise_()
