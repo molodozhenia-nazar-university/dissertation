@@ -10,18 +10,17 @@ class TrafficAnalysisVisualization(QWidget):
         super().__init__()
         self.file_path = file_path
         self.visualization_type = visualization_type
-        self.setWindowTitle(f"Візуалізація: {visualization_type}")
+        self.setWindowTitle(f"Візуалізація")
         self.setWindowIcon(
             self.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
         )
         self.setMinimumSize(800, 600)
         self.showMaximized()
 
-        layout = QVBoxLayout(self)
-        label = QLabel(f"<b>{visualization_type}</b>")
-        layout.addWidget(label)
+        box = QVBoxLayout(self)
 
         # Create figure
         figure = create_plot(file_path, visualization_type)
         canvas = FigureCanvas(figure)
-        layout.addWidget(canvas)
+        canvas.setObjectName("canvas")
+        box.addWidget(canvas)

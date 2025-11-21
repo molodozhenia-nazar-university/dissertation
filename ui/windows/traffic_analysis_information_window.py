@@ -43,18 +43,46 @@ class TrafficAnalysisInformationWindow(QWidget):
         menu_visualization = QMenu("Візуалізація", self)
 
         visualization_items = [
-            "Traffic over Time",
-            "Inbound vs Outbound Traffic",
-            "Top Talkers (Active IPs)",
-            "Protocol Distribution",
-            "RTT / Delay / Jitter",
-            "TCP Retransmissions",
-            "HTTP Responses",
-            "DNS Queries",
-            "Network Map",
-            "Heatmap (Wavelet)",
-            "Latency Variability",
-            "Protocol Volume over Time",
+            # "Traffic over Time"
+            # Показує динаміку мережевої активності в часі — кількість пакетів або байтів у секунду.
+            # Використовується для виявлення піків навантаження, обривів з’єднання або нестабільності каналу.
+            "Трафік у часі",
+            # "Inbound vs Outbound Traffic"
+            # Порівнює вхідний і вихідний трафік — скільки даних приймає і відправляє пристрій.
+            # Допомагає знайти дисбаланс (наприклад, якщо з комп’ютера йде багато вихідного трафіку => можливий витік).
+            "Вхідний vs Вихідний трафік",
+            # "Top Talkers (Active IPs)"
+            # Визначає найактивніші IP-адреси у трафіку.
+            # Використовується для виявлення пристроїв, що створюють найбільше навантаження, або потенційно шкідливих вузлів.
+            "Найактивніші IP",
+            # "Protocol Distribution"
+            # Показує структуру трафіку за типами протоколів (TCP, UDP, DNS, HTTP тощо).
+            # Дає змогу оцінити, які сервіси використовуються найбільше.
+            "Розподіл протоколів",
+            # "TCP Retransmissions"
+            # Відображає кількість повторно відправлених TCP-пакетів (через втрати або помилки).
+            # Якщо графік має піки — можлива нестабільність або перевантаження каналу.
+            "Повторні пакети TCP",
+            # "HTTP Responses"
+            # Аналізує HTTP-відповіді (коди стану 200, 301, 404, 500 тощо).
+            # Дозволяє оцінити доступність веб-сайтів і виявити помилки на стороні сервера або клієнта.
+            "HTTP-відповіді (Статуси серверів)",
+            # "DNS Queries"
+            # Відображає кількість та частоту DNS-запитів — звернень до системи доменних імен.
+            # Дає змогу знайти підозрілу активність або часті повтори запитів.
+            "DNS-запити (Активність доменів)",
+            # "Network Map"
+            # Графічна карта зв’язків між IP-адресами — хто з ким обмінюється даними.
+            # Дає змогу побачити топологію мережі, вузли з великою активністю або неочікувані з’єднання.
+            "Карта мережі",
+            # "Heatmap / Wavelet Analysis"
+            # Теплова карта показує інтенсивність мережевої активності у часі.
+            # У поєднанні з вейвлет-аналізом дає змогу виявити приховані періодичності, піки або аномалії.
+            "Теплова карта",
+            # "Protocol Volume over Time"
+            # Показує, як змінюється обсяг трафіку за протоколами у часі (наприклад, HTTP - HTTPS).
+            # Дозволяє побачити тренди, перехід між сервісами або аномальні зміни структури трафіку.
+            "Обсяг протоколів у часі",
         ]
 
         for item in visualization_items:
@@ -166,3 +194,10 @@ class TrafficAnalysisInformationWindow(QWidget):
         )
         self.traffic_analysis_visualization.show()
         self.traffic_analysis_visualization.raise_()
+
+    def closeEvent(self, event):
+        if hasattr(self, "traffic_analysis_visualization"):
+            child_window = self.traffic_analysis_visualization
+            if child_window is not None:
+                child_window.close()
+        event.accept()
