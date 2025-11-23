@@ -22,6 +22,3 @@ __pycache__/
 packages.txt
 
 # temporary
-core/network.py
-core/network_plus.py
-core/wavelet_analysis.py

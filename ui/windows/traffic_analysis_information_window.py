@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QMenu,
     QMenuBar,
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QThread
 from PyQt6.QtGui import QAction
 
 from ui.windows.traffic_analysis_visualization_window import (
@@ -20,8 +20,9 @@ from ui.windows.traffic_analysis_visualization_window import (
 )
 
 from core.traffic_analysis_information import download_packets, get_details
-
 from core.traffic_analysis_information import get_packet_layers, get_packet_hexdump
+
+from core.thread_worker import ThreadWorker
 
 
 class TrafficAnalysisInformationWindow(QWidget):
@@ -147,16 +148,45 @@ class TrafficAnalysisInformationWindow(QWidget):
         self.packet_hexdump.setReadOnly(True)
         splitter_details.addWidget(self.packet_hexdump)
 
-        # DOWNLOAD PACKETS
-        packets = download_packets(file_path)
-        self.load_packets(packets)
+        # THREAD
+        thread = QThread(information_layout)
+        thread_worker = ThreadWorker(file_path)
+        thread_worker.moveToThread(thread)
 
+        # DOWNLOAD PACKETS
         # DOWNLOAD DEFAULT DETAILS
-        self.download_details(0)
-        self.table_packets.selectRow(0)
+        def finished_information(results: dict):
+            thread.quit()
+            thread.wait()
+            thread_worker.deleteLater()
+
+            # packets = download_packets(file_path)
+            self.load_packets(results)
+
+            self.download_details(0)
+            self.table_packets.selectRow(0)
+
+        def failed_information(error_text: str):
+            thread.quit()
+            thread.wait()
+            thread_worker.deleteLater()
+
+            print(f"❌ Помилка аналізу: {error_text}")
 
         # DOWNLOAD DETAILS
         self.table_packets.cellClicked.connect(self.download_details)
+
+        # save link
+        information_layout.wavelet_thread = thread
+        information_layout.wavelet_thread_worker = thread_worker
+
+        # connect signals
+        thread_worker.finished_information.connect(finished_information)
+        thread_worker.failed_information.connect(failed_information)
+        thread.started.connect(thread_worker.information)
+
+        # start thread
+        thread.start()
 
     def load_packets(self, packets):
         self.table_packets.setRowCount(len(packets))
