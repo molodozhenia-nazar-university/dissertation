@@ -16,14 +16,14 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QProgressBar,  # need use
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QThread
 
 
 from ui.windows.traffic_analysis_information_window import (
     TrafficAnalysisInformationWindow,
 )
 
-from core.wavelet_analysis import wavelet_analysis
+from core.thread_worker import ThreadWorker
 from core.capture import get_interfaces
 from core.capture import start_capture
 
@@ -199,21 +199,37 @@ def create_file_analysis_interface(main_window):
 
         complete_analysis()
 
-    # NEED CHANGE
     def complete_analysis():
 
-        # MAYBE NEED OTHER PLACE
         button_control.setEnabled(True)
 
-        # RESULTS
-        results = wavelet_analysis(selected_file_path, "db4", 6)
+        # for close window
+        if hasattr(main_window, "traffic_analysis_information"):
+            child_window = main_window.traffic_analysis_information
+            if child_window is not None:
+                child_window.close()
 
-        if "error" in results:
-            result_text.setText(f"❌ Помилка: {results['error']}")
-            return
+        nonlocal selected_file_path
 
-        # Форматування результатів
-        result_string = f"""✅ Аналіз завершено!
+        # RESULT
+        result_text.setText("⏳ Виконується вейвлет-аналіз...")
+
+        thread = QThread(interface_widget)
+        thread_worker = ThreadWorker(selected_file_path, "db4", 6, 1)
+        thread_worker.moveToThread(thread)
+
+        def on_finished(results: dict):
+
+            thread.quit()
+            thread.wait()
+            thread_worker.deleteLater()
+
+            if "error" in results:
+                result_text.setText(f"❌ Помилка: {results['error']}")
+                return
+
+            # Форматування результатів
+            result_string = f"""✅ Аналіз завершено!
 
 📊 ЗАГАЛЬНА СТАТИСТИКА:
 • Пакетів проаналізовано: {results['summary']['total_packets']}
@@ -229,21 +245,43 @@ def create_file_analysis_interface(main_window):
 📈 РОЗПОДІЛ ПРОТОКОЛІВ:
 """
 
-        for protocol, count in results["protocol_distribution"].items():
-            result_string += f"• {protocol}: {count} пакетів\n"
+            for protocol, count in results["protocol_distribution"].items():
+                result_string += f"• {protocol}: {count} пакетів\n"
 
-        result_string += "💡 РЕКОМЕНДАЦІЇ:\n"
-        for recommendation in results["recommendations"]:
-            result_string += f"• {recommendation}\n"
+            result_string += "💡 РЕКОМЕНДАЦІЇ:\n"
+            for recommendation in results["recommendations"]:
+                result_string += f"• {recommendation}\n"
 
-        result_text.setText(result_string)
+            # RESULT
+            result_text.setText(result_string)
 
-        # TRAFFIC ANALYSIS INFORMATION
-        main_window.traffic_analysis_information = TrafficAnalysisInformationWindow(
-            selected_file_path
-        )
+            # TRAFFIC ANALYSIS INFORMATION
+            main_window.traffic_analysis_information = TrafficAnalysisInformationWindow(
+                selected_file_path
+            )
 
-        button_information.setEnabled(True)
+            button_information.setEnabled(True)
+
+        def on_failed(error_text: str):
+
+            thread.quit()
+            thread.wait()
+            thread_worker.deleteLater()
+
+            # RESULT
+            result_text.setText(f"❌ Помилка аналізу: {error_text}")
+
+        # save link
+        interface_widget.wavelet_thread = thread
+        interface_widget.wavelet_thread_worker = thread_worker
+
+        # connect signals
+        thread_worker.finished.connect(on_finished)
+        thread_worker.failed.connect(on_failed)
+        thread.started.connect(thread_worker.run)
+
+        # start thread
+        thread.start()
 
     button_browse.clicked.connect(browse_file)
     button_control.clicked.connect(analyze_file)

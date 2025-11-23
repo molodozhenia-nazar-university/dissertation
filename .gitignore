@@ -11,7 +11,6 @@ main.spec
 python_commands.md
 buffer.md
 task.md
-packages.txt
 
 # Python cache
 __pycache__/
@@ -23,6 +22,3 @@ __pycache__/
 packages.txt
 
 # temporary
-core/network.py
-core/network_plus.py
-core/wavelet_analysis.py

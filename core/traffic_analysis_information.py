@@ -1,112 +1,158 @@
 from scapy.all import rdpcap, TCP, UDP, ICMP, DNS, ARP, IP, IPv6, Raw, Ether
 from scapy.layers.http import HTTPRequest, HTTPResponse
 
-pcap_packets = []
+import sys
+from io import StringIO
+from scapy.utils import hexdump
+
+# scapy — бібліотека для роботи з мережевими пакетами тощо.
+
+# rdpcap — функція для читання файлів .pcap/.pcapng
+# Вона повертає список пакетів, кожен з яких можна аналізувати окремо.
+
+# TCP (Transmission Control Protocol)
+# Протокол, який забезпечує надійну передачу даних у мережі (наприклад, HTTP, HTTPS, FTP, SSH).
+
+# UDP (User Datagram Protocol)
+# Протокол для швидкої, але менш надійної передачі даних (без підтверджень).
+
+# ICMP (Internet Control Message Protocol)
+# Використовується для службових повідомлень у мережі.
+# Наприклад, команда "ping" працює саме через ICMP.
+
+# DNS (Domain Name System)
+# Протокол, який перетворює доменне ім’я (наприклад, google.com) у IP-адресу (наприклад, 111.250.111.200).
+
+# ARP (Address Resolution Protocol)
+# Використовується всередині локальної мережі для отримання MAC-адреси пристрою за його IP-адресою.
+
+# IP (Internet Protocol, версія 4)
+# Основний мережевий протокол, який визначає адресу пристрою в мережі (IPv4).
+
+# IPv6 (Internet Protocol, версія 6)
+# Новіша версія IP з більшим простором адрес (для сучасних мереж).
+
+# Raw (сирі дані)
+# Використовується, коли пакет містить необроблену частину даних (payload), яку scapy не може розпізнати як відомий протокол.
+
+# Ether (Ethernet)
+# Найнижчий рівень мережі — описує фізичний кадр у локальній мережі (MAC-адреси).
+
+# HTTPRequest
+# Визначає HTTP-запит від клієнта до сервера (наприклад, GET або POST).
+
+# HTTPResponse
+# Визначає HTTP-відповідь від сервера (наприклад, "200 OK", "404 Not Found").
+
+packets = []
 
 
 def download_packets(file_path):
 
-    global pcap_packets
-    pcap_packets = rdpcap(file_path)
+    global packets
+    packets = rdpcap(file_path)
 
-    packets_summary = []
+    packets_information = []
 
-    start_time = getattr(pcap_packets[0], "time", 0) if len(pcap_packets) > 0 else 0
+    start_time = getattr(packets[0], "time", 0) if len(packets) > 0 else 0
 
-    for i, pkt in enumerate(pcap_packets):
+    for i, packet in enumerate(packets):
         try:
-            timestamp = getattr(pkt, "time", 0)
-            rel_time = timestamp - start_time
-            length = len(pkt)
-            proto = "OTHER"
-            src = dst = "-"
-            info = ""
+            # Абсолютний час створення пакета.
+            stop_time = getattr(packet, "time", 0)
+            # Час відносно початку захоплення.
+            time = stop_time - start_time
+            # Довжина пакета у байтах.
+            length = len(packet)
 
-            # --- IP / IPv6
-            if IP in pkt:
-                src = pkt[IP].src
-                dst = pkt[IP].dst
-            elif IPv6 in pkt:
-                src = pkt[IPv6].src
-                dst = pkt[IPv6].dst
-            elif ARP in pkt:
-                src = pkt[ARP].psrc
-                dst = pkt[ARP].pdst
-                proto = "ARP"
-                info = "Who has {}? Tell {}".format(dst, src)
+            protocol = "OTHER"
+            source = destination = "-"
+            information = ""
+
+            if IP in packet:
+                source = packet[IP].src
+                destination = packet[IP].dst
+            elif IPv6 in packet:
+                source = packet[IPv6].src
+                destination = packet[IPv6].dst
+            elif ARP in packet:
+                source = packet[ARP].psrc
+                destination = packet[ARP].pdst
+                protocol = "ARP"
+                information = "Who has {}? Tell {}".format(destination, source)
 
             # --- Protocols
-            if TCP in pkt:
-                proto = "TCP"
-                sport = pkt[TCP].sport
-                dport = pkt[TCP].dport
-                info = f"{sport} → {dport}"
-                if pkt[TCP].flags:
-                    info += f" [{pkt[TCP].flags}]"
+            if TCP in packet:
+                protocol = "TCP"
+                sport = packet[TCP].sport
+                dport = packet[TCP].dport
+                information = f"{sport} → {dport}"
+                if packet[TCP].flags:
+                    information += f" [{packet[TCP].flags}]"
 
-                if pkt.haslayer(HTTPRequest):
-                    proto = "HTTP"
-                    info = f"{pkt[HTTPRequest].Method.decode()} {pkt[HTTPRequest].Host.decode()}{pkt[HTTPRequest].Path.decode()}"
-                elif pkt.haslayer(HTTPResponse):
-                    proto = "HTTP"
-                    info = f"Response {pkt[HTTPResponse].Status_Code} {pkt[HTTPResponse].Reason_Phrase.decode(errors='ignore')}"
+                if packet.haslayer(HTTPRequest):
+                    protocol = "HTTP"
+                    information = f"{packet[HTTPRequest].Method.decode()} {packet[HTTPRequest].Host.decode()}{packet[HTTPRequest].Path.decode()}"
+                elif packet.haslayer(HTTPResponse):
+                    protocol = "HTTP"
+                    information = f"Response {packet[HTTPResponse].Status_Code} {packet[HTTPResponse].Reason_Phrase.decode(errors='ignore')}"
 
-                elif Raw in pkt:
-                    load = pkt[Raw].load[:40]
+                elif Raw in packet:
+                    load = packet[Raw].load[:40]
                     if b"TLS" in load or b"SSL" in load:
-                        proto = "TLS"
+                        protocol = "TLS"
                     elif b"SSH" in load:
-                        proto = "SSH"
+                        protocol = "SSH"
                     elif b"FTP" in load:
-                        proto = "FTP"
+                        protocol = "FTP"
 
-            elif UDP in pkt:
-                proto = "UDP"
-                sport = pkt[UDP].sport
-                dport = pkt[UDP].dport
-                info = f"{sport} → {dport}"
+            elif UDP in packet:
+                protocol = "UDP"
+                sport = packet[UDP].sport
+                dport = packet[UDP].dport
+                information = f"{sport} → {dport}"
 
-                if DNS in pkt:
-                    proto = "DNS"
-                    if pkt[DNS].qd:
-                        qname = pkt[DNS].qd.qname.decode(errors="ignore")
-                        info = f"Standard query: {qname}"
+                if DNS in packet:
+                    protocol = "DNS"
+                    if packet[DNS].qd:
+                        qname = packet[DNS].qd.qname.decode(errors="ignore")
+                        information = f"Standard query: {qname}"
 
-                elif Raw in pkt:
-                    load = pkt[Raw].load[:50]
+                elif Raw in packet:
+                    load = packet[Raw].load[:50]
                     if b"DHCP" in load:
-                        proto = "DHCP"
+                        protocol = "DHCP"
                     elif b"MDNS" in load:
-                        proto = "MDNS"
+                        protocol = "MDNS"
                     elif b"SSDP" in load:
-                        proto = "SSDP"
+                        protocol = "SSDP"
 
-            elif ICMP in pkt:
-                proto = "ICMP"
-                info = pkt.summary()
+            elif ICMP in packet:
+                protocol = "ICMP"
+                information = packet.summary()
 
-            elif Ether in pkt and proto == "OTHER":
-                if pkt[Ether].type == 0x0806:
-                    proto = "ARP"
-                info = pkt.summary()
+            elif Ether in packet and protocol == "OTHER":
+                if packet[Ether].type == 0x0806:
+                    protocol = "ARP"
+                information = packet.summary()
 
-            packets_summary.append(
+            packets_information.append(
                 {
                     "№": i + 1,
-                    "Time": f"{rel_time:.6f}",
-                    "Source": src,
-                    "Destination": dst,
-                    "Protocol": proto,
+                    "Time": f"{time:.6f}",
+                    "Source": source,
+                    "Destination": destination,
+                    "Protocol": protocol,
                     "Length": length,
-                    "Information": info,
+                    "Information": information,
                 }
             )
 
         except Exception as e:
-            packets_summary.append(
+            packets_information.append(
                 {
                     "№": i + 1,
-                    "Time": "ERR",
+                    "Time": "ERROR",
                     "Source": "-",
                     "Destination": "-",
                     "Protocol": "ERROR",
@@ -115,10 +161,35 @@ def download_packets(file_path):
                 }
             )
 
-    return packets_summary
+    return packets_information
 
 
 def get_details(index):
-    pkt = pcap_packets[index]
-    details = pkt.show(dump=True)
+    packet = packets[index]
+    details = packet.show(dump=True)
     return details
+
+
+def get_packet_layers(index):
+    packet = packets[index]
+    layers = {}
+    while packet:
+        layer = packet.name
+        fields = {k: v for k, v in packet.fields.items()}
+        layers[layer] = fields
+        packet = packet.payload
+    return layers
+
+
+def get_packet_hexdump(index):
+    packet = packets[index]
+    # Перехоплюємо stdout, бо hexdump друкує у консоль.
+    buffer = StringIO()
+    sys_stdout = sys.stdout
+    sys.stdout = buffer
+    try:
+        hexdump(packet)
+    finally:
+        sys.stdout = sys_stdout
+
+    return buffer.getvalue()
