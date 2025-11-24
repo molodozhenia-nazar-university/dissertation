@@ -23,9 +23,9 @@ from ui.windows.traffic_analysis_information_window import (
     TrafficAnalysisInformationWindow,
 )
 
-from core.thread_worker import ThreadWorker
-from core.capture import get_interfaces
-from core.capture import start_capture
+from core.traffic_analysis.thread_worker import ThreadWorker
+from core.traffic_analysis.capture import get_interfaces
+from core.traffic_analysis.capture import start_capture
 
 
 def create_traffic_analysis_tab(main_window):
@@ -48,9 +48,7 @@ def create_traffic_analysis_tab(main_window):
     button_open_file.clicked.connect(lambda: show_analysis_interface("file"))
 
     # Button Live Analysis
-    button_live_analysis = QPushButton(
-        "🌐 Аналіз трафіку мережі в режимі реального часу"
-    )
+    button_live_analysis = QPushButton("🌐 Запис трафіку мережі")
     button_live_analysis.setObjectName("button_live_analysis")
     button_live_analysis.clicked.connect(lambda: show_analysis_interface("live"))
 

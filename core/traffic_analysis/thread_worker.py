@@ -1,9 +1,15 @@
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot
 
-from core.wavelet_analysis import wavelet_analysis
+from core.traffic_analysis.wavelet_analysis import wavelet_analysis
 
-from core.traffic_analysis_information import download_packets, get_details
-from core.traffic_analysis_information import get_packet_layers, get_packet_hexdump
+from core.traffic_analysis.traffic_analysis_information import (
+    download_packets,
+    get_details,
+)
+from core.traffic_analysis.traffic_analysis_information import (
+    get_packet_layers,
+    get_packet_hexdump,
+)
 
 
 class ThreadWorker(QObject):

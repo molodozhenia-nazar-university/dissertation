@@ -136,7 +136,7 @@ class ChatManager:
 
         try:
 
-            from core import test_network
+            from core.expert_system import test_network
 
             function = getattr(test_network, action)
             result = function()

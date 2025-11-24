@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from core.knowledge_base import ChatManager
+from core.expert_system.knowledge_base import ChatManager
 
 
 def create_system_tab(main_window):

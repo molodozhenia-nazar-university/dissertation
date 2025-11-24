@@ -19,10 +19,13 @@ from ui.windows.traffic_analysis_visualization_window import (
     TrafficAnalysisVisualization,
 )
 
-from core.traffic_analysis_information import download_packets, get_details
-from core.traffic_analysis_information import get_packet_layers, get_packet_hexdump
+from core.traffic_analysis.traffic_analysis_information import get_details
+from core.traffic_analysis.traffic_analysis_information import (
+    get_packet_layers,
+    get_packet_hexdump,
+)
 
-from core.thread_worker import ThreadWorker
+from core.traffic_analysis.thread_worker import ThreadWorker
 
 
 class TrafficAnalysisInformationWindow(QWidget):

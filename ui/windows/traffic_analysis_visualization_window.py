@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QStyle
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
-from core.traffic_analysis_visualization import create_plot
+from core.traffic_analysis.traffic_analysis_visualization import create_plot
 
 
 class TrafficAnalysisVisualization(QWidget):
