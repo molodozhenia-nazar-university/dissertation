@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QLineEdit,
     QPushButton,
+    QScrollArea,
     QFileDialog,
     QAbstractItemView,
 )
@@ -190,6 +191,14 @@ def generate_session(
     chat_layout.addWidget(result_title)
     chat_layout.addWidget(report_title)
 
+    # SCROLL AREA WIDGET
+    chat_scroll = QScrollArea()
+    chat_scroll.setWidget(chat_frame)
+    chat_scroll.setWidgetResizable(True)
+    chat_scroll.setFrameShape(QFrame.Shape.NoFrame)
+    chat_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    chat_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
     # HISTORY WIDGET
     history_frame = QFrame()
     history_frame.setObjectName("history_frame")
@@ -214,7 +223,7 @@ def generate_session(
     history_layout.addWidget(history_list)
 
     # Add objects to a splitter layout
-    splitter.addWidget(chat_frame)
+    splitter.addWidget(chat_scroll)
     splitter.addWidget(history_frame)
     splitter.setSizes([700, 300])
 
