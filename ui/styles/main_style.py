@@ -91,6 +91,34 @@ SYSTEM_STYLES = """
 
 """
 
+MENU_ADDITIONAL_STYLES = """
+
+    QFrame#menu_frame_additional {
+        max-height: 80px;
+        background-color: #ffffff;
+        border-bottom: 5px solid #bdc3c7;
+    }
+
+    QPushButton#button_save_session,
+    QPushButton#button_reload_session,
+    QPushButton#button_end_session {
+        padding: 10px 15px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #ffffff;
+        border: none;
+        border-radius: 5px;
+        background-color: #3498db;
+    }
+
+    QPushButton#button_save_session:hover,
+    QPushButton#button_reload_session:hover,
+    QPushButton#button_end_session:hover {
+        background-color: #2980b9;
+    }
+
+"""
+
 CHAT_STYLES = """
 
     QFrame#chat_frame {
@@ -166,30 +194,36 @@ HISTORY_STYLES = """
 
     QFrame#history_frame {
         background-color: #f8f9fa;
-        border-left: 1px solid #bdc3c7;
+        border: none;
     }
 
     QLabel#history_title {
+        font-size: 24px;
         font-weight: bold;
-    }
-
-    QLineEdit#history_search {
-        padding: 10px 15px;
-        background-color: #ffffff;
         color: #2c3e50;
-        border: 3px solid #bdc3c7;
-        border-radius: 15px;
-    }
-
-    QLineEdit#history_search:focus {
-        border: 3px solid #3498db;
     }
 
     QListWidget#history_list {
-        padding: 5px;
+        padding: 10px 0px 10px 10px;
         background-color: #ffffff;
         border: 1px solid #e0e0e0;
-        border-radius: 5px;        
+        border-radius: 5px;
+    }
+
+    QListWidget#history_list::item {
+        margin-bottom: 25px;
+        margin-right: 10px;
+        text-align: left;
+        font-size: 20px;
+        color: #000000;
+        border: 1px solid transparent;
+    }
+
+    QListWidget#history_list::item:selected {
+        margin-bottom: 25px;
+        margin-right: 10px;
+        background-color: #e6f2ff;
+        border: 1px solid #4a90e2;
     }
 
 """
@@ -204,6 +238,7 @@ def apply_styles(app):
         MAIN_WINDOW_STYLES
         + MENU_STYLES
         + SYSTEM_STYLES
+        + MENU_ADDITIONAL_STYLES
         + CHAT_STYLES
         + HISTORY_STYLES
         + TRAFFIC_ANALYSIS_STYLES

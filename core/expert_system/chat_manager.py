@@ -13,7 +13,8 @@ class ChatManager:
         answers_layout,
         result_title,
         report_title,
-        button_save_and_reload,
+        button_end_session,
+        history_manager,
     ):
         self.knowledge_base = self.load_knowledge_base()
         self.current_chat_id = "START"
@@ -24,7 +25,8 @@ class ChatManager:
         self.answers_layout = answers_layout
         self.result_title = result_title
         self.report_title = report_title
-        self.button_save_and_reload = button_save_and_reload
+        self.button_end_session = button_end_session
+        self.history_manager = history_manager
 
     def load_knowledge_base(self):
         with open("knowledge_base/knowledge_base.json", "r", encoding="utf-8") as f:
@@ -68,6 +70,9 @@ class ChatManager:
         self.current_chat_id = next_chat_id
         self.generate_chat_content(next_chat)
 
+        if self.history_manager is not None:
+            self.history_manager.last_chat_id = self.current_chat_id
+
     # Handle User
 
     def add_question_to_chat(self, question_information):
@@ -91,9 +96,18 @@ class ChatManager:
 
             button_answer.setMinimumWidth(750)
 
-            button_answer.clicked.connect(
-                lambda checked, chat_id=next_chat_id: next_chat(chat_id)
-            )
+            def on_click(checked, chat_id=next_chat_id, answer=answer_text):
+                if self.history_manager is not None:
+                    self.history_manager.add_step(
+                        chat_id=self.current_chat_id,
+                        question=self.question_title.text(),
+                        answer=answer,
+                        recommendation=self.recommendation_title.text(),
+                        result=self.result_title.text(),
+                    )
+                next_chat(chat_id)
+
+            button_answer.clicked.connect(on_click)
             self.answers_layout.addWidget(button_answer)
 
     def add_result_to_chat(self, result_information):
@@ -172,7 +186,13 @@ class ChatManager:
 
     def handle_report(self, chat_data):
         self.add_report_to_chat("\n".join(chat_data.get("report") or []))
-        self.button_save_and_reload.setVisible(True)
+        self.button_end_session.setVisible(True)
+
+        if self.history_manager is not None:
+            self.history_manager.set_report(
+                "\n".join(chat_data.get("report") or []),
+                last_chat_id=self.current_chat_id,
+            )
 
     # Clear Chat
 

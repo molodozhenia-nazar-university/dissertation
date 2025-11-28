@@ -4,6 +4,7 @@ build/
 dist/
 backup/
 live_traffic/
+sessions
 .vscode/
 
 # files

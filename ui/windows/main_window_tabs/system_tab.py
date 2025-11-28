@@ -9,10 +9,13 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QLineEdit,
     QPushButton,
+    QFileDialog,
+    QAbstractItemView,
 )
 from PyQt6.QtCore import Qt
 
-from core.expert_system.knowledge_base import ChatManager
+from core.expert_system.chat_manager import ChatManager
+from core.expert_system.history_manager import HistoryManager
 
 
 def create_system_tab(main_window):
@@ -73,14 +76,60 @@ def create_system_tab(main_window):
 
 
 def new_session(system_and_pages_stacked_widget, system_page_widget):
+    generate_session(
+        system_and_pages_stacked_widget, system_page_widget, session_file=None
+    )
+
+
+def open_session(system_and_pages_stacked_widget, system_page_widget):
+
+    session_file, _ = QFileDialog.getOpenFileName(
+        None,
+        "Оберіть файл сесії експертної системи",
+        # "D:\\",
+        "sessions",
+        "Файли сесії (*session.es.json);;Усі файли (*)",
+    )
+
+    if not session_file:
+        system_and_pages_stacked_widget.setCurrentIndex(0)
+        return
+
+    generate_session(
+        system_and_pages_stacked_widget, system_page_widget, session_file=session_file
+    )
+
+
+def generate_session(
+    system_and_pages_stacked_widget, system_page_widget, session_file: str | None = None
+):
 
     clear_layout(system_page_widget.layout())
 
     # CHAT and HISTORY WIDGETS
     chat_and_history_frame = QFrame()
-    chat_and_history_layout = QHBoxLayout(chat_and_history_frame)
+    chat_and_history_layout = QVBoxLayout(chat_and_history_frame)
     chat_and_history_layout.setSpacing(0)
     chat_and_history_layout.setContentsMargins(0, 0, 0, 0)
+
+    # MENU ADDITIONAL WIDGET
+    menu_frame = QFrame()
+    menu_layout = QHBoxLayout(menu_frame)
+    menu_frame.setObjectName("menu_frame_additional")
+
+    button_save_session = QPushButton("📘 Зберегти сесію")
+    button_save_session.setObjectName("button_save_session")
+
+    button_reload_session = QPushButton("📘 Розпочати заново")
+    button_reload_session.setObjectName("button_reload_session")
+
+    button_end_session = QPushButton("📘 Завершити")
+    button_end_session.setObjectName("button_end_session")
+    button_end_session.setVisible(False)
+
+    menu_layout.addWidget(button_save_session, 1)
+    menu_layout.addWidget(button_reload_session, 1)
+    menu_layout.addWidget(button_end_session, 1)
 
     # SPLITTER
     splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -132,14 +181,6 @@ def new_session(system_and_pages_stacked_widget, system_page_widget):
     report_title.setWordWrap(True)
     report_title.setVisible(False)
 
-    # BUTTON SAVE AND RELOAD
-    button_save_and_reload = QPushButton("Завершити")
-    button_save_and_reload.setObjectName("button_save_and_reload")
-    button_save_and_reload.setVisible(False)
-    button_save_and_reload.clicked.connect(
-        lambda: system_and_pages_stacked_widget.setCurrentIndex(0)
-    )
-
     # Add objects to a chat layout
     chat_layout.addWidget(action_title)
     chat_layout.addWidget(description_title)
@@ -148,8 +189,68 @@ def new_session(system_and_pages_stacked_widget, system_page_widget):
     chat_layout.addWidget(answers_container)
     chat_layout.addWidget(result_title)
     chat_layout.addWidget(report_title)
-    chat_layout.addStretch(1)
-    chat_layout.addWidget(button_save_and_reload)
+
+    # HISTORY WIDGET
+    history_frame = QFrame()
+    history_frame.setObjectName("history_frame")
+    history_layout = QVBoxLayout(history_frame)
+
+    # History title and list
+
+    history_title = QLabel("Історія діалогу:")
+    history_title.setObjectName("history_title")
+
+    history_list = QListWidget()
+    history_list.setObjectName("history_list")
+    history_list.setWordWrap(True)
+    history_list.setUniformItemSizes(False)
+    history_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    history_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+    history_list.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+    history_list.verticalScrollBar().setSingleStep(10)
+
+    # Add objects to a history layout
+    history_layout.addWidget(history_title)
+    history_layout.addWidget(history_list)
+
+    # Add objects to a splitter layout
+    splitter.addWidget(chat_frame)
+    splitter.addWidget(history_frame)
+    splitter.setSizes([700, 300])
+
+    # Add objects to a chat and history layout
+    chat_and_history_layout.addWidget(menu_frame)
+    chat_and_history_layout.addWidget(splitter)
+
+    # Add objects to a system layout
+    system_page_widget.layout().addWidget(chat_and_history_frame)
+
+    # HISTORY MANAGER
+
+    history_manager = HistoryManager(history_list)
+
+    # TYPE SESSION
+    if session_file is None:
+        history_manager.start_session(start_chat_id="START")
+        current_chat_id = "START"
+    else:
+        last_chat_id = history_manager.load_session(session_file)
+        if not last_chat_id:
+            last_chat_id = "START"
+        current_chat_id = last_chat_id
+
+    # MENU ADDITIONAL SIGNALS
+
+    def end_session():
+        if history_manager is not None:
+            history_manager.save_to_file()
+        system_and_pages_stacked_widget.setCurrentIndex(0)
+
+    button_save_session.clicked.connect(lambda: history_manager.save_to_file())
+    button_reload_session.clicked.connect(
+        lambda: system_and_pages_stacked_widget.setCurrentIndex(0)
+    )
+    button_end_session.clicked.connect(lambda: end_session())
 
     # CHAT_MANAGER START
 
@@ -161,70 +262,17 @@ def new_session(system_and_pages_stacked_widget, system_page_widget):
         answers_layout,
         result_title,
         report_title,
-        button_save_and_reload,
+        button_end_session,
+        history_manager,
     )
 
     def next_chat(next_chat_id):
         chat_manager.handle_chat(next_chat_id, next_chat)
 
+    chat_manager.current_chat_id = current_chat_id
     chat_manager.generate_chat_content(next_chat)
 
     # CHAT_MANAGER END
-
-    # HISTORY WIDGET
-    history_frame = QFrame()
-    history_frame.setObjectName("history_frame")
-    history_layout = QVBoxLayout(history_frame)
-
-    # Search line and history title and list
-
-    history_search = QLineEdit()
-    history_search.setObjectName("history_search")
-    history_search.setPlaceholderText("Пошук...")
-
-    history_title = QLabel("Історія запитів:")
-    history_title.setObjectName("history_title")
-    history_list = QListWidget()
-    history_list.setObjectName("history_list")
-
-    # Add objects to a history layout
-    history_layout.addWidget(history_search)
-    history_layout.addWidget(history_title)
-    history_layout.addWidget(history_list)
-
-    # Add objects to a splitter layout
-    splitter.addWidget(chat_frame)
-    splitter.addWidget(history_frame)
-    splitter.setSizes([700, 300])
-
-    # Add objects to a chat and history layout
-    chat_and_history_layout.addWidget(splitter)
-
-    # Add objects to a system layout
-    system_page_widget.layout().addWidget(chat_and_history_frame)
-
-    system_and_pages_stacked_widget.setCurrentIndex(1)
-
-
-def open_session(system_and_pages_stacked_widget, system_page_widget):
-
-    clear_layout(system_page_widget.layout())
-
-    # Plug
-    label = QLabel("open_session")
-    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    system_page_widget.layout().addWidget(label)
-
-    # BUTTON SAVE AND RELOAD
-    button_save_and_reload = QPushButton("Завершити")
-    button_save_and_reload.setObjectName("button_save_and_reload")
-    button_save_and_reload.setVisible(False)
-    button_save_and_reload.clicked.connect(
-        lambda: system_and_pages_stacked_widget.setCurrentIndex(0)
-    )
-
-    system_page_widget.layout().addStretch(1)
-    system_page_widget.layout().addWidget(button_save_and_reload)
 
     system_and_pages_stacked_widget.setCurrentIndex(1)
 
