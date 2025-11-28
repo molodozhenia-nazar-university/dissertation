@@ -159,18 +159,21 @@ CHAT_STYLES = """
         margin: 0px 0px 0px 0px;
     }
 
-    QPushButton#button_answer {
+    MyWidget_AnswerButton#button_answer {
         padding: 10px 15px;
-        text-align: left;
-        font-size: 20px;
-        font-weight: bold;
-        color: #ffffff;
         background-color: #3498db;
         border: none;
         border-radius: 5px;
     }
 
-    QPushButton#button_answer:hover {
+    MyWidget_AnswerButton#button_answer QLabel {
+        text-align: left;
+        font-size: 20px;
+        font-weight: bold;
+        color: #ffffff;
+    }
+
+    MyWidget_AnswerButton#button_answer:hover {
         background-color: #2980b9;
     }
 

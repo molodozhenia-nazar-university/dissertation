@@ -1,5 +1,6 @@
 import json
 from PyQt6.QtWidgets import QPushButton
+from widgets.my_widget_answer_button import MyWidget_AnswerButton
 
 
 class ChatManager:
@@ -91,12 +92,10 @@ class ChatManager:
 
     def create_answer_buttons(self, answers_information, next_chat):
         for answer_text, next_chat_id in answers_information.items():
-            button_answer = QPushButton(answer_text)
+            button_answer = MyWidget_AnswerButton(answer_text)
             button_answer.setObjectName("button_answer")
 
-            button_answer.setMinimumWidth(750)
-
-            def on_click(checked, chat_id=next_chat_id, answer=answer_text):
+            def on_click(checked=False, chat_id=next_chat_id, answer=answer_text):
                 if self.history_manager is not None:
                     self.history_manager.add_step(
                         chat_id=self.current_chat_id,
