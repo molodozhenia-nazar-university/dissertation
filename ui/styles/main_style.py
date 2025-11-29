@@ -8,6 +8,9 @@ from ui.styles.traffic_analysis_visualization_style import (
     TRAFFIC_ANALYSIS_VISUALIZATION_STYLES,
 )
 
+# WIDGET STYLES
+from ui.styles.history_in_bubble_style import HYSTORY_IN_BUBBLE_STYLES
+
 MAIN_WINDOW_STYLES = """
 
     QMainWindow {
@@ -206,12 +209,28 @@ HISTORY_STYLES = """
         color: #2c3e50;
     }
 
+    QScrollArea#history_scroll {
+        background-color: #f8f9fa;
+        border: none;
+    }
+
+    QFrame#history_list_frame {
+        padding: 10px 0px 10px 10px;
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+    }
+
     QListWidget#history_list {
         padding: 10px 0px 10px 10px;
         background-color: #ffffff;
         border: 1px solid #e0e0e0;
         border-radius: 5px;
     }
+
+"""
+
+"""
 
     QListWidget#history_list::item {
         margin-bottom: 25px;
@@ -221,7 +240,7 @@ HISTORY_STYLES = """
         color: #000000;
         border: 1px solid transparent;
     }
-
+    
     QListWidget#history_list::item:selected {
         margin-bottom: 25px;
         margin-right: 10px;
@@ -247,6 +266,7 @@ def apply_styles(app):
         + TRAFFIC_ANALYSIS_STYLES
         + TRAFFIC_ANALYSIS_INFORMATION_STYLES
         + TRAFFIC_ANALYSIS_VISUALIZATION_STYLES
+        + HYSTORY_IN_BUBBLE_STYLES
     )
 
     app.setStyleSheet(all_styles)

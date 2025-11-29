@@ -193,7 +193,9 @@ def generate_session(
 
     # SCROLL AREA WIDGET
     chat_scroll = QScrollArea()
+    chat_scroll.setObjectName("chat_scroll")
     chat_scroll.setWidget(chat_frame)
+    chat_scroll.setMinimumWidth(500)
     chat_scroll.setWidgetResizable(True)
     chat_scroll.setFrameShape(QFrame.Shape.NoFrame)
     chat_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -202,6 +204,7 @@ def generate_session(
     # HISTORY WIDGET
     history_frame = QFrame()
     history_frame.setObjectName("history_frame")
+    history_frame.setMinimumWidth(500)
     history_layout = QVBoxLayout(history_frame)
 
     # History title and list

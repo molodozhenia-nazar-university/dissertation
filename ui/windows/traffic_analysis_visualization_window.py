@@ -14,7 +14,7 @@ class TrafficAnalysisVisualization(QWidget):
         self.setWindowIcon(
             self.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
         )
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(1280, 720)
         self.showMaximized()
 
         box = QVBoxLayout(self)

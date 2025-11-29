@@ -4,6 +4,8 @@ from datetime import datetime
 
 from PyQt6.QtWidgets import QListWidget, QListWidgetItem
 
+from widgets.my_widget_history_in_bubble_style import MyWidget_HistoryInBubbleStyle
+
 
 class HistoryManager:
 
@@ -63,18 +65,13 @@ class HistoryManager:
 
         self.steps.append(step)
 
-        display_text = [
-            f"Крок {index} (вузол: {chat_id})",
-            f"Q: {step['question'] or '-'}",
-            f"A: {step['answer'] or '-'}",
-        ]
-        if step["recommendation"]:
-            display_text.append(f"Рекомендація:\n{step['recommendation']}")
-        if step["result"]:
-            display_text.append(f"Результат:\n{step['result']}")
-
-        item = QListWidgetItem("\n".join(display_text))
+        item = QListWidgetItem()
         self.history_list.addItem(item)
+
+        bubble_item = MyWidget_HistoryInBubbleStyle(step)
+
+        item.setSizeHint(bubble_item.sizeHint())
+        self.history_list.setItemWidget(item, bubble_item)
 
         self.history_list.scrollToBottom()
 
@@ -90,9 +87,8 @@ class HistoryManager:
         self.report = report_text.strip()
 
         if self.report:
-            item = QListWidgetItem("=== ЗВІТ ===\n" + self.report)
-            self.history_list.addItem(item)
-            self.history_list.scrollToBottom()
+            # need code
+            return
 
     def to_dict(self) -> dict:
         return {
@@ -136,22 +132,18 @@ class HistoryManager:
         self.history_list.clear()
 
         for step in self.steps:
-            display_text = [
-                f"Крок {step.get('index')} (вузол: {step.get('chat_id')})",
-                f"Q: {step.get('question') or '-'}",
-                f"A: {step.get('answer') or '-'}",
-            ]
-            if step.get("recommendation"):
-                display_text.append(f"Рекомендація:\n{step['recommendation']}")
-            if step.get("result"):
-                display_text.append(f"Результат:\n{step['result']}")
 
-            item = QListWidgetItem("\n".join(display_text))
+            item = QListWidgetItem()
             self.history_list.addItem(item)
+
+            bubble_item = MyWidget_HistoryInBubbleStyle(step)
+
+            item.setSizeHint(bubble_item.sizeHint())
+            self.history_list.setItemWidget(item, bubble_item)
 
         if self.report:
-            item = QListWidgetItem("=== ЗВІТ ===\n" + self.report)
-            self.history_list.addItem(item)
+            # need code
+            return self.last_chat_id
 
         self.history_list.scrollToBottom()
 
