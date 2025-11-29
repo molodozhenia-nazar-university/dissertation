@@ -5,6 +5,9 @@ from datetime import datetime
 from PyQt6.QtWidgets import QListWidget, QListWidgetItem
 
 from widgets.my_widget_history_in_bubble_style import MyWidget_HistoryInBubbleStyle
+from widgets.my_widget_history_report_in_bubble_style import (
+    MyWidget_HistoryReportInBubbleStyle,
+)
 
 
 class HistoryManager:
@@ -75,6 +78,18 @@ class HistoryManager:
 
         self.history_list.scrollToBottom()
 
+    def _add_report(self):
+
+        item = QListWidgetItem()
+        self.history_list.addItem(item)
+
+        report_item = MyWidget_HistoryReportInBubbleStyle(self.report)
+
+        item.setSizeHint(report_item.sizeHint())
+        self.history_list.setItemWidget(item, report_item)
+
+        self.history_list.scrollToBottom()
+
     def set_report(self, report_text: str, last_chat_id: str | None = None):
 
         if self.report:
@@ -87,8 +102,7 @@ class HistoryManager:
         self.report = report_text.strip()
 
         if self.report:
-            # need code
-            return
+            self._add_report()
 
     def to_dict(self) -> dict:
         return {
@@ -141,10 +155,9 @@ class HistoryManager:
             item.setSizeHint(bubble_item.sizeHint())
             self.history_list.setItemWidget(item, bubble_item)
 
-        if self.report:
-            # need code
-            return self.last_chat_id
-
         self.history_list.scrollToBottom()
+
+        if self.report:
+            self._add_report()
 
         return self.last_chat_id

@@ -214,6 +214,7 @@ def generate_session(
 
     history_list = QListWidget()
     history_list.setObjectName("history_list")
+    history_list.setSpacing(25)
     history_list.setWordWrap(True)
     history_list.setUniformItemSizes(False)
     history_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)

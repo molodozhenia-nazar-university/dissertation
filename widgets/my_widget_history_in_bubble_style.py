@@ -1,5 +1,4 @@
 from PyQt6.QtWidgets import QWidget, QFrame, QVBoxLayout, QLabel, QSizePolicy
-from PyQt6.QtCore import Qt
 
 
 class MyWidget_HistoryInBubbleStyle(QWidget):
