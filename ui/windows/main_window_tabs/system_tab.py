@@ -18,6 +18,8 @@ from PyQt6.QtCore import Qt
 from core.expert_system.chat_manager import ChatManager
 from core.expert_system.history_manager import HistoryManager
 
+from widgets.my_widget_history_list import MyWidget_HistoryList
+
 
 def create_system_tab(main_window):
 
@@ -212,9 +214,9 @@ def generate_session(
     history_title = QLabel("Історія діалогу:")
     history_title.setObjectName("history_title")
 
-    history_list = QListWidget()
+    history_list = MyWidget_HistoryList()
     history_list.setObjectName("history_list")
-    history_list.setSpacing(25)
+    history_list.setViewportMargins(10, 10, 10, 10)
     history_list.setWordWrap(True)
     history_list.setUniformItemSizes(False)
     history_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)

@@ -210,20 +210,20 @@ HISTORY_STYLES = """
     }
 
     QListWidget#history_list {
-        /* padding: 10px 10px 10px 10px; */
-        background-color: ffffff; /* ffffff */
+        background-color: #ffffff;
         border: 1px solid #e0e0e0;
         border-radius: 5px;
     }
 
     QListWidget#history_list::item {
-        text-align: left;
+        margin-bottom: 25px;
         font-size: 20px;
         color: #000000;
         border: 1px solid transparent;
     }
 
     QListWidget#history_list::item:selected {
+        margin-bottom: 25px;
         background-color: #f5f5f5;
         border: 1px solid #666666;
     }
