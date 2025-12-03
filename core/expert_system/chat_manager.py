@@ -2,6 +2,7 @@ import json
 from widgets.my_widget_answer_button import MyWidget_AnswerButton
 
 from core.expert_system.bayes.bayes import load_rule_base, apply_bayes_rule
+from core.settings.settings_manager import settings_manager
 
 
 class ChatManager:
@@ -30,22 +31,16 @@ class ChatManager:
         self.button_end_session = button_end_session
         self.history_manager = history_manager
 
-        # <<< BAYES >>>
-        self.rule_base = load_rule_base("rule_base/rule_base.json")
+        if settings_manager.is_bayes_enabled():
+            self.rule_base = load_rule_base("rule_base/rule_base.json")
 
-    # <<< DEFAULT >>>
-    """
     def load_knowledge_base(self):
-        with open("knowledge_base/knowledge_base.json", "r", encoding="utf-8") as f:
-            return json.load(f)
-    """
-
-    # <<< BAYES >>>
-    def load_knowledge_base(self):
-        with open(
-            "knowledge_base/knowledge_base_bayes_test.json", "r", encoding="utf-8"
-        ) as f:
-            return json.load(f)
+        if settings_manager.is_bayes_enabled():
+            with open("knowledge_base/bayes_base.json", "r", encoding="utf-8") as f:
+                return json.load(f)
+        else:
+            with open("knowledge_base/knowledge_base.json", "r", encoding="utf-8") as f:
+                return json.load(f)
 
     def get_chat_data(self, chat_id):
         return self.knowledge_base.get(chat_id)
@@ -83,15 +78,19 @@ class ChatManager:
 
     def handle_chat(self, next_chat_id, next_chat):
 
-        # <<< BAYES >>>
-        # Якщо наступний ID — це правило (R_...), то обробляємо через bayes.py
-        if isinstance(next_chat_id, str) and next_chat_id.startswith("R_"):
-            try:
-                resolved_next_id = apply_bayes_rule(next_chat_id, self.rule_base)
-                print(f"[BAYES] Rule {next_chat_id} -> обрано вузол {resolved_next_id}")
-                next_chat_id = resolved_next_id
-            except Exception as e:
-                print(f"Помилка застосування байєсівського правила {next_chat_id}: {e}")
+        if settings_manager.is_bayes_enabled():
+            # Якщо наступний ID — це правило (R_...), то обробляємо через bayes.py
+            if isinstance(next_chat_id, str) and next_chat_id.startswith("R_"):
+                try:
+                    resolved_next_id = apply_bayes_rule(next_chat_id, self.rule_base)
+                    print(
+                        f"[BAYES] Rule {next_chat_id} -> обрано вузол {resolved_next_id}"
+                    )
+                    next_chat_id = resolved_next_id
+                except Exception as e:
+                    print(
+                        f"Помилка застосування байєсівського правила {next_chat_id}: {e}"
+                    )
 
         self.current_chat_id = next_chat_id
         self.generate_chat_content(next_chat)

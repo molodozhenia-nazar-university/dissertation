@@ -8,6 +8,8 @@ from ui.styles.traffic_analysis_visualization_style import (
     TRAFFIC_ANALYSIS_VISUALIZATION_STYLES,
 )
 
+from ui.styles.settings_style import SETTINGS_STYLES
+
 # WIDGET STYLES
 from ui.styles.history_in_bubble_style import HYSTORY_IN_BUBBLE_STYLES
 
@@ -247,6 +249,7 @@ def apply_styles(app):
         + TRAFFIC_ANALYSIS_INFORMATION_STYLES
         + TRAFFIC_ANALYSIS_VISUALIZATION_STYLES
         + HYSTORY_IN_BUBBLE_STYLES
+        + SETTINGS_STYLES
     )
 
     app.setStyleSheet(all_styles)

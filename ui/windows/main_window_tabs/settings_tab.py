@@ -1,5 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QCheckBox
+
+from core.settings.settings_manager import settings_manager
 
 
 def create_settings_tab(main_window):
@@ -7,10 +8,14 @@ def create_settings_tab(main_window):
     settings_widget = QWidget()
     settings_layout = QVBoxLayout(settings_widget)
 
-    # Plug
-    label = QLabel("Налаштування - вкладка в розробці")
-    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    settings_layout.addWidget(label)
+    bayes_checkbox = QCheckBox("Bayes Mode")
+    bayes_checkbox.setObjectName("bayes_checkbox")
+    bayes_checkbox.setChecked(False)
+    settings_layout.addWidget(bayes_checkbox)
+
+    settings_manager.set_bayes_checkbox(bayes_checkbox)
+
+    settings_layout.addStretch()
 
     main_window.stacked_widget.addWidget(settings_widget)
 
