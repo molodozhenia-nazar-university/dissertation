@@ -1,0 +1,29 @@
+{
+	"R_NO_INTERNET": {
+		"type": "bayes_rule",
+		"description": "Правило для вибору кращої гілки діагностики при повній відсутності інтернету.",
+		"evidence": "E_NO_INTERNET",
+		"options": {
+			"Q_ONE": {
+				"target": "Q_ONE",
+
+				"p_h": 0.4,
+				"p_e_given_h": 0.8,
+				"p_e": 0.5,
+				"p_h_given_e": 0.64,
+
+				"weight": 1.0
+			},
+			"Q_TWO": {
+				"target": "Q_TWO",
+
+				"p_h": 0.6,
+				"p_e_given_h": 0.5,
+				"p_e": 0.5,
+				"p_h_given_e": 0.6,
+
+				"weight": 0.9
+			}
+		}
+	}
+}
