@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QComboBox,
     QSpinBox,
+    QCheckBox,
     QProgressBar,  # need use
 )
 from PyQt6.QtCore import Qt, QTimer, QThread
@@ -89,8 +90,8 @@ def create_traffic_analysis_tab(main_window):
     # Add objects to a traffic analysis layout
     traffic_analysis_layout.addWidget(traffic_analysis_title)
     traffic_analysis_layout.addWidget(buttons_container)
-    traffic_analysis_layout.addWidget(button_back)
     traffic_analysis_layout.addWidget(traffic_analysis_stacked_widget)
+    traffic_analysis_layout.addWidget(button_back, 0, Qt.AlignmentFlag.AlignRight)
 
     def show_analysis_interface(type_analysis):
         if type_analysis == "file":
@@ -124,10 +125,12 @@ def create_file_analysis_interface(main_window):
     selected_file_path = ""
 
     interface_widget = QWidget()
+    interface_widget.setObjectName("interface_widget_file")
     interface_layout = QVBoxLayout(interface_widget)
 
     # FILE
     file_widget = QWidget()
+    file_widget.setObjectName("file_widget")
     file_layout = QHBoxLayout(file_widget)
 
     button_browse = QPushButton("📂 Обрати файл")
@@ -140,6 +143,7 @@ def create_file_analysis_interface(main_window):
 
     # Button Control Analysis
     control_widget = QWidget()
+    control_widget.setObjectName("control_widget")
     control_layout = QHBoxLayout(control_widget)
 
     button_control = QPushButton("🔍 Почати аналіз")
@@ -148,7 +152,9 @@ def create_file_analysis_interface(main_window):
 
     # RESULT
     result_text = QTextEdit()
-    result_text.setPlaceholderText("Тут будуть результати аналізу...")
+    result_text.setObjectName("result_text_file")
+    result_text.setReadOnly(True)
+    result_text.setPlaceholderText("Тут будуть результати аналізу трафіка мережі")
 
     # ASSEMBLE FILE ANALYSIS INTERFACE
     interface_layout.addWidget(file_widget)
@@ -157,6 +163,7 @@ def create_file_analysis_interface(main_window):
 
     # Button Information
     button_information = QPushButton("📄 Додаткова інформація")
+    button_information.setObjectName("button_information")
     interface_layout.addWidget(button_information)
 
     def open_traffic_analysis_information_window(main_window):
@@ -294,10 +301,12 @@ def create_live_analysis_interface(main_window):
     is_monitoring = False
 
     interface_widget = QWidget()
+    interface_widget.setObjectName("interface_widget_live")
     interface_layout = QVBoxLayout(interface_widget)
 
     # SETTINGS MONITORING
     settings_group = QGroupBox("Налаштування моніторингу")
+    settings_group.setObjectName("settings_group")
     settings_layout = QVBoxLayout(settings_group)
 
     # Network interface
@@ -307,13 +316,11 @@ def create_live_analysis_interface(main_window):
     network_interface_layout.addWidget(network_interface_label)
 
     network_interface_combo = QComboBox()
+    network_interface_combo.setObjectName("network_interface_combo")
 
     dictionary_network_interfaces = get_interfaces()
     network_interface_combo.addItems(dictionary_network_interfaces.keys())
-    """
-    network_interfaces = get_interfaces()
-    network_interface_combo.addItems(network_interfaces)
-    """
+
     network_interface_layout.addWidget(network_interface_combo)
 
     network_interface_layout.addStretch()
@@ -321,18 +328,23 @@ def create_live_analysis_interface(main_window):
     # Capture duration
     duration_layout = QHBoxLayout()
 
+    use_duration_checkbox = QCheckBox("Обмежувати тривалість")
+    use_duration_checkbox.setObjectName("use_duration_checkbox")
+    use_duration_checkbox.setChecked(True)
+
     duration_label = QLabel("Тривалість захоплення трафіку мережі:")
-    duration_layout.addWidget(duration_label)
 
     duration_spin = QSpinBox()
+    duration_spin.setObjectName("duration_spin")
 
-    duration_spin.setRange(30, 600)
-    duration_spin.setValue(30)
+    duration_spin.setRange(0, 3600)
+    duration_spin.setValue(60)
 
     duration_spin.setSuffix(" сек")
 
+    duration_layout.addWidget(duration_label)
     duration_layout.addWidget(duration_spin)
-
+    duration_layout.addWidget(use_duration_checkbox)
     duration_layout.addStretch()
 
     # Size buffer
@@ -342,6 +354,7 @@ def create_live_analysis_interface(main_window):
     buffer_layout.addWidget(buffer_label)
 
     buffer_spin = QSpinBox()
+    buffer_spin.setObjectName("buffer_spin")
 
     buffer_spin.setRange(1, 100)
     buffer_spin.setValue(50)
@@ -361,7 +374,9 @@ def create_live_analysis_interface(main_window):
 
     control_layout = QHBoxLayout()
     button_control_start = QPushButton("▶️ Почати моніторинг")
+    button_control_start.setObjectName("button_control_start")
     button_control_stop = QPushButton("⏹️ Зупинити моніторинг")
+    button_control_stop.setObjectName("button_control_stop")
     button_control_stop.setEnabled(False)
 
     control_layout.addWidget(button_control_start)
@@ -370,10 +385,12 @@ def create_live_analysis_interface(main_window):
     control_layout.addStretch()
 
     # RESULT
-    result_group = QGroupBox("Результати моніторингу в реальному часі")
+    result_group = QGroupBox("Результати моніторингу")
+    result_group.setObjectName("result_group")
     result_layout = QVBoxLayout(result_group)
 
     result_text = QTextEdit()
+    result_text.setObjectName("result_text_live")
     result_text.setReadOnly(True)
     result_text.setPlaceholderText("Статус моніторингу: не активний")
 
@@ -383,7 +400,6 @@ def create_live_analysis_interface(main_window):
     interface_layout.addWidget(settings_group)
     interface_layout.addLayout(control_layout)
     interface_layout.addWidget(result_group)
-    interface_layout.addStretch()
 
     # METHODS
 
