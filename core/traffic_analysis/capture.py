@@ -1,5 +1,8 @@
-from scapy.all import sniff, wrpcap, conf
+import os
+from scapy.all import conf
 from threading import Thread
+
+from core.traffic_analysis.capture_session import CaptureSession
 
 
 def get_interfaces():
@@ -69,18 +72,39 @@ def determine_friendly_name(lower_name):
         return "Інший адаптер"
 
 
-def start_capture(interface, duration, output_path, update_status_result):
-    def capture_thread():
-        try:
-            update_status_result(f"🔍 Початок захоплення з {interface}...")
-            packets = sniff(
-                iface=interface,
-                timeout=duration,
-            )
-            wrpcap(output_path, packets)
-            update_status_result(f"✅ Захоплено {len(packets)} пакетів.")
-            update_status_result(f"💾 Збережено у файл: {output_path}")
-        except Exception as e:
-            update_status_result(f"❌ Помилка захоплення: {e}")
+def generate_unique_capture_filename(
+    folder="live_traffic", base_name="live_traffic", ext=".pcap"
+):
+    os.makedirs(folder, exist_ok=True)
 
-    Thread(target=capture_thread, daemon=True).start()
+    index = 0
+    while True:
+        filename = f"{base_name}_{index}{ext}"
+        full_path = os.path.join(folder, filename)
+        if not os.path.exists(full_path):
+            return full_path
+        index += 1
+
+
+def start_capture(
+    interface,
+    use_duration,
+    duration,
+    buffer_spin_mb,
+    output_path,
+    update_result_text,
+    on_finished,
+):
+    capture_session = CaptureSession(
+        interface,
+        use_duration,
+        duration,
+        buffer_spin_mb,
+        output_path,
+        update_result_text,
+        on_finished,
+    )
+
+    Thread(target=capture_session.start, daemon=True).start()
+
+    return capture_session

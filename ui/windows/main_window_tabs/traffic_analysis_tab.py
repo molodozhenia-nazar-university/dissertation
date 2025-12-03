@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (
     QCheckBox,
     QProgressBar,  # need use
 )
-from PyQt6.QtCore import Qt, QTimer, QThread
+from PyQt6.QtCore import Qt, QThread
 
 
 from ui.windows.traffic_analysis_information_window import (
@@ -25,7 +25,11 @@ from ui.windows.traffic_analysis_information_window import (
 )
 
 from core.traffic_analysis.thread_worker import ThreadWorker
+
+from core.traffic_analysis.live_signals import LiveSignals
+
 from core.traffic_analysis.capture import get_interfaces
+from core.traffic_analysis.capture import generate_unique_capture_filename
 from core.traffic_analysis.capture import start_capture
 
 
@@ -297,12 +301,14 @@ def create_file_analysis_interface(main_window):
 def create_live_analysis_interface(main_window):
 
     # VARIABLE
-    timer = QTimer()
+    capture_session = None
     is_monitoring = False
 
     interface_widget = QWidget()
     interface_widget.setObjectName("interface_widget_live")
     interface_layout = QVBoxLayout(interface_widget)
+
+    live_signals = LiveSignals(interface_widget)
 
     # SETTINGS MONITORING
     settings_group = QGroupBox("Налаштування моніторингу")
@@ -350,7 +356,7 @@ def create_live_analysis_interface(main_window):
     # Size buffer
     buffer_layout = QHBoxLayout()
 
-    buffer_label = QLabel("Розмір буфера:")
+    buffer_label = QLabel("Розмір файлу:")
     buffer_layout.addWidget(buffer_label)
 
     buffer_spin = QSpinBox()
@@ -401,63 +407,73 @@ def create_live_analysis_interface(main_window):
     interface_layout.addLayout(control_layout)
     interface_layout.addWidget(result_group)
 
-    # METHODS
+    live_signals.log.connect(result_text.append)
 
-    def update_status_result(text):
-        result_text.append(text)
+    def handle_capture_finished():
+        nonlocal capture_session
+        nonlocal is_monitoring
+
+        is_monitoring = False
+        capture_session = None
+
+        button_control_start.setEnabled(True)
+        button_control_stop.setEnabled(False)
+
+    live_signals.finished.connect(handle_capture_finished)
+
+    # METHODS
 
     def start_monitoring():
 
+        nonlocal capture_session
         nonlocal is_monitoring
         is_monitoring = True
         button_control_start.setEnabled(False)
         button_control_stop.setEnabled(True)
 
-        # Change result
         result_text.clear()
-        update_status_result("🟢 Моніторинг активний...\n")
+        live_signals.log.emit("🟢 Моніторинг активний\n")
 
         # Folder for save file
         os.makedirs("live_traffic", exist_ok=True)
-        output_path = os.path.join("live_traffic", "live_traffic.pcap")
+        output_path = generate_unique_capture_filename(
+            folder="live_traffic", base_name="traffic", ext=".pcap"
+        )
 
         # Interface for monitoring
         display_name_interface = network_interface_combo.currentText()
         system_name_interface = dictionary_network_interfaces[display_name_interface]
 
+        # Flag - use duration
+        use_duration = use_duration_checkbox.isChecked()
         # Duration for monitoring
         duration = duration_spin.value()
+        # Size buffer
+        buffer_spin_mb = buffer_spin.value()
 
-        # Change result
-        update_status_result(f"📡 Захоплення трафіку з {display_name_interface}")
-        update_status_result(f"🕒 Тривалість: {duration} сек")
+        def on_capture_finished():
+            live_signals.finished.emit()
 
         # CAPTURE
-        start_capture(
+        capture_session = start_capture(
             system_name_interface,
+            use_duration,
             duration,
+            buffer_spin_mb,
             output_path,
-            update_status_result,
+            live_signals.log.emit,
+            on_capture_finished,
         )
 
-        # STOP TIME
-        timer.singleShot(duration * 1000, stop_monitoring)
-
     def stop_monitoring():
-
+        nonlocal capture_session
         nonlocal is_monitoring
 
         if not is_monitoring:
             return
 
-        is_monitoring = False
-        button_control_start.setEnabled(True)
-        button_control_stop.setEnabled(False)
-
-        update_status_result("\n🔴 Моніторинг завершено.")
-        update_status_result(
-            f"📁 Результат збережено у: live_traffic/live_traffic.pcap"
-        )
+        if capture_session is not None:
+            capture_session.stop()
 
     button_control_start.clicked.connect(start_monitoring)
     button_control_stop.clicked.connect(stop_monitoring)
