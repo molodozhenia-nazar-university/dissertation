@@ -1,4 +1,4 @@
-knowledge_base_bayes_test.json описує правило R_NO_INTERNET, де є дві гіпотези (два можливі переходи):
+bayes_base.json описує правило R_NO_INTERNET, де є дві гіпотези (два можливі переходи):
 
 - гіпотеза Q_ONE → перейти до вузла Q_ONE
 - гіпотеза Q_TWO → перейти до вузла Q_TWO
