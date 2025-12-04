@@ -31,6 +31,7 @@ from core.traffic_analysis.live_signals import LiveSignals
 from core.traffic_analysis.capture import get_interfaces
 from core.traffic_analysis.capture import generate_unique_capture_filename
 from core.traffic_analysis.capture import start_capture
+from core.traffic_analysis.formatters import format_analysis_results
 
 
 def create_traffic_analysis_tab(main_window):
@@ -200,17 +201,14 @@ def create_file_analysis_interface(main_window):
 
     def analyze_file():
         if not selected_file_path:
-            result_text.setText("❌ Будь ласка, оберіть файл для аналізу")
+            result_text.setText("❌ Будь ласка, оберіть файл для аналізу.")
             return
 
-        button_control.setEnabled(False)
-        result_text.setText("⏳ Виконується вейвлет-аналіз...")
+        result_text.setText("⏳ Виконується вейвлет-аналіз.")
 
         complete_analysis()
 
     def complete_analysis():
-
-        button_control.setEnabled(True)
 
         # for close window
         if hasattr(main_window, "traffic_analysis_information"):
@@ -219,9 +217,6 @@ def create_file_analysis_interface(main_window):
                 child_window.close()
 
         nonlocal selected_file_path
-
-        # RESULT
-        result_text.setText("⏳ Виконується вейвлет-аналіз...")
 
         thread = QThread(interface_widget)
         thread_worker = ThreadWorker(selected_file_path, "db4", 6, 1)
@@ -237,36 +232,14 @@ def create_file_analysis_interface(main_window):
                 result_text.setText(f"❌ Помилка: {results['error']}")
                 return
 
-            # Форматування результатів
-            result_string = f"""✅ Аналіз завершено!
+            # main_window.traffic_analysis_results = results # buffer
 
-📊 ЗАГАЛЬНА СТАТИСТИКА:
-• Пакетів проаналізовано: {results['summary']['total_packets']}
-• Тривалість аналізу: {results['summary']['analysis_duration']}
-• Вейвлет: {results['summary']['wavelet_type']} (рівень {results['summary']['wavelet_level']})
-
-🚨 ВИЯВЛЕНІ АНОМАЛІЇ:
-• Спайків трафіку: {results['detected_anomalies']['volume_anomalies']}
-• Аномалій пакетів: {results['detected_anomalies']['packet_anomalies']} 
-• Протокольних аномалій: {results['detected_anomalies']['protocol_anomalies']}
-• Змін тренду: {results['detected_anomalies']['trend_changes']}
-
-📈 РОЗПОДІЛ ПРОТОКОЛІВ:
-"""
-
-            for protocol, count in results["protocol_distribution"].items():
-                result_string += f"• {protocol}: {count} пакетів\n"
-
-            result_string += "💡 РЕКОМЕНДАЦІЇ:\n"
-            for recommendation in results["recommendations"]:
-                result_string += f"• {recommendation}\n"
-
-            # RESULT
+            result_string = format_analysis_results(results)
             result_text.setText(result_string)
 
             # TRAFFIC ANALYSIS INFORMATION
-            main_window.traffic_analysis_information = TrafficAnalysisInformationWindow(
-                selected_file_path
+            main_window.traffic_analysis_information = (
+                TrafficAnalysisInformationWindow()
             )
 
             button_information.setEnabled(True)

@@ -6,6 +6,10 @@ from scapy.all import rdpcap, TCP, UDP, ICMP, DNS
 
 warnings.filterwarnings("ignore")
 
+from core.traffic_analysis.traffic_analysis_information import set_packets
+from core.traffic_analysis.traffic_analysis_information import set_packets_information
+from core.traffic_analysis.traffic_analysis_information import build_packets_information
+
 
 def wavelet_analysis(file_path, wavelet_type="db4", level=6, interval_sec=1):
 
@@ -178,6 +182,10 @@ def wavelet_analysis(file_path, wavelet_type="db4", level=6, interval_sec=1):
 
         print(f"📦 Обробка {len(packets)} пакетів...")
 
+        set_packets(packets)
+
+        set_packets_information(build_packets_information(packets))
+
         # Виділення характеристик трафіку
         timestamps, sizes, protocols = extract_traffic_features(packets)
 
@@ -263,9 +271,7 @@ def wavelet_analysis(file_path, wavelet_type="db4", level=6, interval_sec=1):
                 "⚠️ СЕРЕДНІЙ РІВЕНЬ: Виявлено помірну аномальну активність"
             )
         elif total_anomalies > 0:
-            results["recommendations"].append(
-                "ℹ️ НИЗЬКИЙ РІВЕНЬ: Незначні аномалії, рекомендується моніторинг"
-            )
+            results["recommendations"].append("ℹ️ НИЗЬКИЙ РІВЕНЬ: Незначні аномалії")
         else:
             results["recommendations"].append("✅ НОРМА: Аномалій не виявлено")
 
