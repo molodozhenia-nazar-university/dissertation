@@ -5,10 +5,13 @@ from collections import Counter, defaultdict
 import numpy
 import matplotlib.pyplot as pyplot
 
+from core.traffic_analysis.traffic_analysis_information import get_packets
 
-def create_plot(file_path, visualization_name):
 
-    packets = rdpcap(file_path)
+def create_plot(visualization_name):
+
+    packets = get_packets()
+
     if not packets:
         figure, ax = pyplot.subplots()
         ax.text(0.5, 0.5, "Проблема!", ha="center", va="center")

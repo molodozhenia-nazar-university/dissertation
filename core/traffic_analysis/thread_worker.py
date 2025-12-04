@@ -1,15 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot
 
-from core.traffic_analysis.wavelet_analysis import wavelet_analysis
-
-from core.traffic_analysis.traffic_analysis_information import (
-    download_packets,
-    get_details,
-)
-from core.traffic_analysis.traffic_analysis_information import (
-    get_packet_layers,
-    get_packet_hexdump,
-)
+from core.traffic_analysis.wavelet_analysis_old import wavelet_analysis
 
 
 class ThreadWorker(QObject):
@@ -36,15 +27,3 @@ class ThreadWorker(QObject):
             self.finished.emit(results)
         except Exception as e:
             self.failed.emit(str(e))
-
-    finished_information = pyqtSignal(list)  # success information
-    failed_information = pyqtSignal(str)  # defeat information
-
-    @pyqtSlot()
-    def information(self):
-
-        try:
-            results = download_packets(self.file_path)
-            self.finished_information.emit(results)
-        except Exception as e:
-            self.failed_information.emit(str(e))

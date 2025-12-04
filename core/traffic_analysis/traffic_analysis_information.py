@@ -45,12 +45,28 @@ from scapy.utils import hexdump
 # Визначає HTTP-відповідь від сервера (наприклад, "200 OK", "404 Not Found").
 
 packets = []
+packets_information = []
 
 
-def download_packets(file_path):
-
+def set_packets(new_packets):
     global packets
-    packets = rdpcap(file_path)
+    packets = new_packets
+
+
+def get_packets():
+    return packets or []
+
+
+def set_packets_information(build_packets_information):
+    global packets_information
+    packets_information = build_packets_information
+
+
+def get_packets_information():
+    return packets_information or []
+
+
+def build_packets_information(packets):
 
     packets_information = []
 

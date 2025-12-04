@@ -14,9 +14,10 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QComboBox,
     QSpinBox,
+    QCheckBox,
     QProgressBar,  # need use
 )
-from PyQt6.QtCore import Qt, QTimer, QThread
+from PyQt6.QtCore import Qt, QThread
 
 
 from ui.windows.traffic_analysis_information_window import (
@@ -24,8 +25,13 @@ from ui.windows.traffic_analysis_information_window import (
 )
 
 from core.traffic_analysis.thread_worker import ThreadWorker
+
+from core.traffic_analysis.live_signals import LiveSignals
+
 from core.traffic_analysis.capture import get_interfaces
+from core.traffic_analysis.capture import generate_unique_capture_filename
 from core.traffic_analysis.capture import start_capture
+from core.traffic_analysis.formatters_old import format_analysis_results
 
 
 def create_traffic_analysis_tab(main_window):
@@ -89,8 +95,8 @@ def create_traffic_analysis_tab(main_window):
     # Add objects to a traffic analysis layout
     traffic_analysis_layout.addWidget(traffic_analysis_title)
     traffic_analysis_layout.addWidget(buttons_container)
-    traffic_analysis_layout.addWidget(button_back)
     traffic_analysis_layout.addWidget(traffic_analysis_stacked_widget)
+    traffic_analysis_layout.addWidget(button_back, 0, Qt.AlignmentFlag.AlignRight)
 
     def show_analysis_interface(type_analysis):
         if type_analysis == "file":
@@ -124,10 +130,12 @@ def create_file_analysis_interface(main_window):
     selected_file_path = ""
 
     interface_widget = QWidget()
+    interface_widget.setObjectName("interface_widget_file")
     interface_layout = QVBoxLayout(interface_widget)
 
     # FILE
     file_widget = QWidget()
+    file_widget.setObjectName("file_widget")
     file_layout = QHBoxLayout(file_widget)
 
     button_browse = QPushButton("📂 Обрати файл")
@@ -140,6 +148,7 @@ def create_file_analysis_interface(main_window):
 
     # Button Control Analysis
     control_widget = QWidget()
+    control_widget.setObjectName("control_widget")
     control_layout = QHBoxLayout(control_widget)
 
     button_control = QPushButton("🔍 Почати аналіз")
@@ -148,7 +157,9 @@ def create_file_analysis_interface(main_window):
 
     # RESULT
     result_text = QTextEdit()
-    result_text.setPlaceholderText("Тут будуть результати аналізу...")
+    result_text.setObjectName("result_text_file")
+    result_text.setReadOnly(True)
+    result_text.setPlaceholderText("Тут будуть результати аналізу трафіка мережі")
 
     # ASSEMBLE FILE ANALYSIS INTERFACE
     interface_layout.addWidget(file_widget)
@@ -157,6 +168,7 @@ def create_file_analysis_interface(main_window):
 
     # Button Information
     button_information = QPushButton("📄 Додаткова інформація")
+    button_information.setObjectName("button_information")
     interface_layout.addWidget(button_information)
 
     def open_traffic_analysis_information_window(main_window):
@@ -189,17 +201,14 @@ def create_file_analysis_interface(main_window):
 
     def analyze_file():
         if not selected_file_path:
-            result_text.setText("❌ Будь ласка, оберіть файл для аналізу")
+            result_text.setText("❌ Будь ласка, оберіть файл для аналізу.")
             return
 
-        button_control.setEnabled(False)
-        result_text.setText("⏳ Виконується вейвлет-аналіз...")
+        result_text.setText("⏳ Виконується вейвлет-аналіз.")
 
         complete_analysis()
 
     def complete_analysis():
-
-        button_control.setEnabled(True)
 
         # for close window
         if hasattr(main_window, "traffic_analysis_information"):
@@ -208,9 +217,6 @@ def create_file_analysis_interface(main_window):
                 child_window.close()
 
         nonlocal selected_file_path
-
-        # RESULT
-        result_text.setText("⏳ Виконується вейвлет-аналіз...")
 
         thread = QThread(interface_widget)
         thread_worker = ThreadWorker(selected_file_path, "db4", 6, 1)
@@ -226,36 +232,14 @@ def create_file_analysis_interface(main_window):
                 result_text.setText(f"❌ Помилка: {results['error']}")
                 return
 
-            # Форматування результатів
-            result_string = f"""✅ Аналіз завершено!
+            # main_window.traffic_analysis_results = results # buffer
 
-📊 ЗАГАЛЬНА СТАТИСТИКА:
-• Пакетів проаналізовано: {results['summary']['total_packets']}
-• Тривалість аналізу: {results['summary']['analysis_duration']}
-• Вейвлет: {results['summary']['wavelet_type']} (рівень {results['summary']['wavelet_level']})
-
-🚨 ВИЯВЛЕНІ АНОМАЛІЇ:
-• Спайків трафіку: {results['detected_anomalies']['volume_anomalies']}
-• Аномалій пакетів: {results['detected_anomalies']['packet_anomalies']} 
-• Протокольних аномалій: {results['detected_anomalies']['protocol_anomalies']}
-• Змін тренду: {results['detected_anomalies']['trend_changes']}
-
-📈 РОЗПОДІЛ ПРОТОКОЛІВ:
-"""
-
-            for protocol, count in results["protocol_distribution"].items():
-                result_string += f"• {protocol}: {count} пакетів\n"
-
-            result_string += "💡 РЕКОМЕНДАЦІЇ:\n"
-            for recommendation in results["recommendations"]:
-                result_string += f"• {recommendation}\n"
-
-            # RESULT
+            result_string = format_analysis_results(results)
             result_text.setText(result_string)
 
             # TRAFFIC ANALYSIS INFORMATION
-            main_window.traffic_analysis_information = TrafficAnalysisInformationWindow(
-                selected_file_path
+            main_window.traffic_analysis_information = (
+                TrafficAnalysisInformationWindow()
             )
 
             button_information.setEnabled(True)
@@ -290,14 +274,18 @@ def create_file_analysis_interface(main_window):
 def create_live_analysis_interface(main_window):
 
     # VARIABLE
-    timer = QTimer()
+    capture_session = None
     is_monitoring = False
 
     interface_widget = QWidget()
+    interface_widget.setObjectName("interface_widget_live")
     interface_layout = QVBoxLayout(interface_widget)
+
+    live_signals = LiveSignals(interface_widget)
 
     # SETTINGS MONITORING
     settings_group = QGroupBox("Налаштування моніторингу")
+    settings_group.setObjectName("settings_group")
     settings_layout = QVBoxLayout(settings_group)
 
     # Network interface
@@ -307,13 +295,11 @@ def create_live_analysis_interface(main_window):
     network_interface_layout.addWidget(network_interface_label)
 
     network_interface_combo = QComboBox()
+    network_interface_combo.setObjectName("network_interface_combo")
 
     dictionary_network_interfaces = get_interfaces()
     network_interface_combo.addItems(dictionary_network_interfaces.keys())
-    """
-    network_interfaces = get_interfaces()
-    network_interface_combo.addItems(network_interfaces)
-    """
+
     network_interface_layout.addWidget(network_interface_combo)
 
     network_interface_layout.addStretch()
@@ -321,27 +307,33 @@ def create_live_analysis_interface(main_window):
     # Capture duration
     duration_layout = QHBoxLayout()
 
+    use_duration_checkbox = QCheckBox("Обмежувати тривалість")
+    use_duration_checkbox.setObjectName("use_duration_checkbox")
+    use_duration_checkbox.setChecked(True)
+
     duration_label = QLabel("Тривалість захоплення трафіку мережі:")
-    duration_layout.addWidget(duration_label)
 
     duration_spin = QSpinBox()
+    duration_spin.setObjectName("duration_spin")
 
-    duration_spin.setRange(30, 600)
-    duration_spin.setValue(30)
+    duration_spin.setRange(0, 3600)
+    duration_spin.setValue(60)
 
     duration_spin.setSuffix(" сек")
 
+    duration_layout.addWidget(duration_label)
     duration_layout.addWidget(duration_spin)
-
+    duration_layout.addWidget(use_duration_checkbox)
     duration_layout.addStretch()
 
     # Size buffer
     buffer_layout = QHBoxLayout()
 
-    buffer_label = QLabel("Розмір буфера:")
+    buffer_label = QLabel("Розмір файлу:")
     buffer_layout.addWidget(buffer_label)
 
     buffer_spin = QSpinBox()
+    buffer_spin.setObjectName("buffer_spin")
 
     buffer_spin.setRange(1, 100)
     buffer_spin.setValue(50)
@@ -361,7 +353,9 @@ def create_live_analysis_interface(main_window):
 
     control_layout = QHBoxLayout()
     button_control_start = QPushButton("▶️ Почати моніторинг")
+    button_control_start.setObjectName("button_control_start")
     button_control_stop = QPushButton("⏹️ Зупинити моніторинг")
+    button_control_stop.setObjectName("button_control_stop")
     button_control_stop.setEnabled(False)
 
     control_layout.addWidget(button_control_start)
@@ -370,10 +364,12 @@ def create_live_analysis_interface(main_window):
     control_layout.addStretch()
 
     # RESULT
-    result_group = QGroupBox("Результати моніторингу в реальному часі")
+    result_group = QGroupBox("Результати моніторингу")
+    result_group.setObjectName("result_group")
     result_layout = QVBoxLayout(result_group)
 
     result_text = QTextEdit()
+    result_text.setObjectName("result_text_live")
     result_text.setReadOnly(True)
     result_text.setPlaceholderText("Статус моніторингу: не активний")
 
@@ -383,65 +379,74 @@ def create_live_analysis_interface(main_window):
     interface_layout.addWidget(settings_group)
     interface_layout.addLayout(control_layout)
     interface_layout.addWidget(result_group)
-    interface_layout.addStretch()
+
+    live_signals.log.connect(result_text.append)
+
+    def handle_capture_finished():
+        nonlocal capture_session
+        nonlocal is_monitoring
+
+        is_monitoring = False
+        capture_session = None
+
+        button_control_start.setEnabled(True)
+        button_control_stop.setEnabled(False)
+
+    live_signals.finished.connect(handle_capture_finished)
 
     # METHODS
 
-    def update_status_result(text):
-        result_text.append(text)
-
     def start_monitoring():
 
+        nonlocal capture_session
         nonlocal is_monitoring
         is_monitoring = True
         button_control_start.setEnabled(False)
         button_control_stop.setEnabled(True)
 
-        # Change result
         result_text.clear()
-        update_status_result("🟢 Моніторинг активний...\n")
+        live_signals.log.emit("🟢 Моніторинг активний\n")
 
         # Folder for save file
         os.makedirs("live_traffic", exist_ok=True)
-        output_path = os.path.join("live_traffic", "live_traffic.pcap")
+        output_path = generate_unique_capture_filename(
+            folder="live_traffic", base_name="traffic", ext=".pcap"
+        )
 
         # Interface for monitoring
         display_name_interface = network_interface_combo.currentText()
         system_name_interface = dictionary_network_interfaces[display_name_interface]
 
+        # Flag - use duration
+        use_duration = use_duration_checkbox.isChecked()
         # Duration for monitoring
         duration = duration_spin.value()
+        # Size buffer
+        buffer_spin_mb = buffer_spin.value()
 
-        # Change result
-        update_status_result(f"📡 Захоплення трафіку з {display_name_interface}")
-        update_status_result(f"🕒 Тривалість: {duration} сек")
+        def on_capture_finished():
+            live_signals.finished.emit()
 
         # CAPTURE
-        start_capture(
+        capture_session = start_capture(
             system_name_interface,
+            use_duration,
             duration,
+            buffer_spin_mb,
             output_path,
-            update_status_result,
+            live_signals.log.emit,
+            on_capture_finished,
         )
 
-        # STOP TIME
-        timer.singleShot(duration * 1000, stop_monitoring)
-
     def stop_monitoring():
-
+        nonlocal capture_session
         nonlocal is_monitoring
 
         if not is_monitoring:
             return
 
-        is_monitoring = False
-        button_control_start.setEnabled(True)
-        button_control_stop.setEnabled(False)
-
-        update_status_result("\n🔴 Моніторинг завершено.")
-        update_status_result(
-            f"📁 Результат збережено у: live_traffic/live_traffic.pcap"
-        )
+        if capture_session is not None:
+            capture_session.stop()
 
     button_control_start.clicked.connect(start_monitoring)
     button_control_stop.clicked.connect(stop_monitoring)
